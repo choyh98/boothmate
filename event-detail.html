@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ILV | 전시 상세보기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #07080d;
+      --paper: #E2E8F0;
+      --blue: #0056ff;
+      --muted: #64748b;
+      --line: rgba(15, 23, 42, .12);
+      --panel: rgba(255, 255, 255, .86);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Noto Sans KR", "Inter", system-ui, sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at var(--mx, 70%) var(--my, 24%), rgba(0, 86, 255, .18), transparent 320px),
+        var(--paper);
+    }
+    .nav {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      width: min(1120px, calc(100% - 36px));
+      padding: 10px 12px 10px 14px;
+      border: 1px solid rgba(15, 23, 42, .12);
+      border-radius: 24px;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 16px 42px rgba(15,23,42,.1), inset 0 1px 0 rgba(255,255,255,.75);
+      backdrop-filter: blur(20px);
+      transform: translateX(-50%);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "Inter", sans-serif;
+      font-size: 27px;
+      font-weight: 900;
+    }
+    .brand-logo {
+      display: block;
+      width: 156px;
+      height: auto;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: clamp(16px, 3vw, 34px);
+      color: #252832;
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .nav-links a {
+      transition: color .2s ease, transform .2s ease;
+    }
+    .nav-links a:hover,
+    .nav-links a.is-active {
+      color: var(--blue);
+      transform: translateY(-1px);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .primary-button,
+    .secondary-button {
+      position: relative;
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 22px;
+      border-radius: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, color .2s ease, background .2s ease;
+    }
+    .primary-button {
+      color: white;
+      border: 0;
+      background: var(--blue);
+      box-shadow: 6px 6px 0 var(--ink);
+      overflow: hidden;
+    }
+    .primary-button::before {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0 35%, rgba(255,255,255,.34) 48%, transparent 62% 100%);
+      transform: translateX(-120%);
+      transition: transform .45s ease;
+      content: "";
+    }
+    .primary-button:hover {
+      background: #0049dc;
+      box-shadow: 9px 9px 0 var(--ink), 0 18px 34px rgba(0,86,255,.22);
+      transform: translate(-2px, -2px);
+    }
+    .primary-button:hover::before { transform: translateX(120%); }
+    .secondary-button {
+      border: 1px solid var(--ink);
+      background: white;
+    }
+    .secondary-button:hover {
+      color: var(--blue);
+      border-color: var(--blue);
+      box-shadow: 6px 6px 0 rgba(0,86,255,.16);
+      transform: translateY(-3px);
+    }
+    .shell {
+      width: min(1120px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 126px 0 76px;
+    }
+    .crumb {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 20px;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .crumb a {
+      color: var(--blue);
+    }
+    .detail-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(360px, .8fr);
+      gap: 28px;
+      align-items: start;
+    }
+    .gallery,
+    .detail-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      box-shadow: 0 18px 42px rgba(15,23,42,.08);
+      backdrop-filter: blur(16px);
+    }
+    .gallery {
+      padding: 14px;
+    }
+    .hero-image {
+      position: relative;
+      height: 430px;
+      border-radius: 10px;
+      background: #0f172a;
+      overflow: hidden;
+    }
+    .hero-image img,
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .45s ease, filter .45s ease;
+    }
+    .hero-image:hover img {
+      transform: scale(1.06);
+      filter: saturate(1.12);
+    }
+    .hero-image::after {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(0,86,255,.2), transparent 240px);
+      content: "";
+    }
+    .thumbs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .thumb {
+      height: 104px;
+      border: 2px solid transparent;
+      border-radius: 9px;
+      background: #0f172a;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .thumb:hover,
+    .thumb.is-active {
+      border-color: var(--blue);
+      box-shadow: 6px 6px 0 rgba(0,86,255,.22);
+      transform: translateY(-4px);
+    }
+    .detail-card {
+      padding: 32px;
+    }
+    .badges {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .badge {
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .badge.green {
+      color: #15803d;
+      background: #dcfce7;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.14;
+      font-weight: 900;
+    }
+    .info-list {
+      display: grid;
+      gap: 16px;
+      margin: 30px 0;
+    }
+    .info-row {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 18px;
+      align-items: start;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .info-row span:first-child {
+      color: #64748b;
+    }
+    .info-row strong {
+      font-weight: 900;
+    }
+    .deadline {
+      color: #ef4444;
+    }
+    .site-link {
+      color: var(--blue);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .detail-actions {
+      display: grid;
+      grid-template-columns: .8fr 1.3fr;
+      gap: 14px;
+      margin-top: 26px;
+    }
+    .save-button {
+      display: inline-flex;
+      min-height: 54px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid #dbe4f0;
+      border-radius: 10px;
+      background: white;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .save-button:hover,
+    .save-button.is-active {
+      color: var(--blue);
+      border-color: rgba(0,86,255,.32);
+      box-shadow: 6px 6px 0 rgba(0,86,255,.16);
+      transform: translateY(-3px);
+    }
+    .quote-button {
+      display: inline-flex;
+      min-height: 54px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: white;
+      border-radius: 10px;
+      background: var(--blue);
+      box-shadow: 6px 6px 0 var(--ink);
+      font-weight: 900;
+      overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .quote-button:hover {
+      box-shadow: 9px 9px 0 var(--ink), 0 18px 34px rgba(0,86,255,.22);
+      transform: translate(-2px, -2px);
+    }
+    @media (max-width: 960px) {
+      .nav-links { display: none; }
+      .detail-layout { grid-template-columns: 1fr; }
+      .detail-card { padding: 24px; }
+    }
+    @media (max-width: 680px) {
+      .nav {
+        top: 12px;
+        width: calc(100% - 24px);
+        padding: 10px 10px 10px 12px;
+        border-radius: 18px;
+      }
+      .nav-actions .secondary-button { display: none; }
+      .brand { font-size: 23px; }
+      .brand-logo { width: 126px; }
+      .shell {
+        width: calc(100% - 28px);
+        padding-top: 112px;
+      }
+      .hero-image { height: 300px; }
+      .thumbs { gap: 9px; }
+      .thumb { height: 78px; }
+      .detail-actions { grid-template-columns: 1fr; }
+      .info-row { grid-template-columns: 78px 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="nav" aria-label="주요 메뉴">
+      <a class="brand" href="index.html#top" aria-label="ILV 홈">
+        <img class="brand-logo" src="assets/logo.svg" alt="ILV" />
+      </a>
+      <nav class="nav-links">
+        <a class="is-active" href="schedule.html">전시 일정</a>
+        <a href="quote.html">견적 요청</a>
+        <a href="index.html#vendors">업체 찾기</a>
+        <a href="index.html#guide">이용 방법</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="secondary-button" href="login.html">로그인</a>
+        <a class="primary-button" href="quote.html">무료 견적</a>
+      </div>
+    </header>
+
+    <section class="shell">
+      <div class="crumb">
+        <a href="index.html#top">홈</a>
+        <span>›</span>
+        <a href="schedule.html">전시 일정</a>
+        <span>›</span>
+        <span>상세보기</span>
+      </div>
+
+      <div class="detail-layout">
+        <div class="gallery">
+          <div class="hero-image">
+            <img id="mainImage" src="assets/ilv-booth-hero.png" alt="2024 AI World Expo 전시장 전경" />
+          </div>
+          <div class="thumbs" aria-label="전시 이미지 갤러리">
+            <button class="thumb is-active" type="button"><img src="assets/ilv-booth-hero.png" alt="메인 전시장" /></button>
+            <button class="thumb" type="button"><img src="assets/ilv-booth-hero.png" alt="컨퍼런스 공간" /></button>
+            <button class="thumb" type="button"><img src="assets/ilv-booth-hero.png" alt="발표 현장" /></button>
+          </div>
+        </div>
+
+        <aside class="detail-card">
+          <div class="badges">
+            <span class="badge">IT / AI</span>
+            <span class="badge green">신청 진행중</span>
+          </div>
+          <h1>2024 AI World Expo & Conference</h1>
+
+          <div class="info-list">
+            <div class="info-row">
+              <span>개최 기간</span>
+              <strong>2024.07.12(금) - 07.14(일) / 3일간</strong>
+            </div>
+            <div class="info-row">
+              <span>장소</span>
+              <strong>코엑스(COEX) Hall A, B</strong>
+            </div>
+            <div class="info-row">
+              <span>주최사</span>
+              <strong>한국인공지능협회, 엑스포럼</strong>
+            </div>
+            <div class="info-row">
+              <span>참가신청</span>
+              <strong class="deadline">~ 2024.06.10(월) 까지</strong>
+            </div>
+            <div class="info-row">
+              <span>홈페이지</span>
+              <strong><a class="site-link" href="#">공식 홈페이지 바로가기 ↗</a></strong>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="save-button" type="button">♡ 관심 저장</button>
+            <a class="quote-button" href="quote.html">이 전시회 견적 요청하기 →</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const page = document.querySelector(".page");
+    if (page) {
+      page.addEventListener("pointermove", (event) => {
+        page.style.setProperty("--mx", `${event.clientX}px`);
+        page.style.setProperty("--my", `${event.clientY}px`);
+      });
+    }
+
+    const mainImage = document.querySelector("#mainImage");
+    document.querySelectorAll(".thumb").forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        document.querySelectorAll(".thumb").forEach((item) => item.classList.remove("is-active"));
+        thumb.classList.add("is-active");
+        mainImage.src = thumb.querySelector("img").src;
+      });
+    });
+
+    const heroImage = document.querySelector(".hero-image");
+    if (heroImage) {
+      heroImage.addEventListener("pointermove", (event) => {
+        const rect = heroImage.getBoundingClientRect();
+        heroImage.style.setProperty("--gx", `${event.clientX - rect.left}px`);
+        heroImage.style.setProperty("--gy", `${event.clientY - rect.top}px`);
+      });
+    }
+
+    const saveButton = document.querySelector(".save-button");
+    if (saveButton) {
+      saveButton.addEventListener("click", () => {
+        saveButton.classList.toggle("is-active");
+        saveButton.textContent = saveButton.classList.contains("is-active") ? "♥ 관심 저장됨" : "♡ 관심 저장";
+      });
+    }
+  </script>
+</body>
+</html>

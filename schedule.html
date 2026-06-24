@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ILV | 전시 일정</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #07080d;
+      --paper: #E2E8F0;
+      --blue: #0056ff;
+      --muted: #64748b;
+      --line: rgba(15, 23, 42, .12);
+      --panel: rgba(255, 255, 255, .82);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Noto Sans KR", "Inter", system-ui, sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at var(--mx, 72%) var(--my, 24%), rgba(0, 86, 255, .18), transparent 310px),
+        var(--paper);
+    }
+
+    .nav {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      width: min(1120px, calc(100% - 36px));
+      padding: 10px 12px 10px 14px;
+      border: 1px solid rgba(15, 23, 42, .12);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, .88);
+      box-shadow: 0 16px 42px rgba(15, 23, 42, .1), inset 0 1px 0 rgba(255, 255, 255, .75);
+      backdrop-filter: blur(20px);
+      transform: translateX(-50%);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "Inter", sans-serif;
+      font-size: 27px;
+      font-weight: 900;
+    }
+
+    .brand-logo {
+      display: block;
+      width: 156px;
+      height: auto;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: clamp(16px, 3vw, 34px);
+      color: #252832;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .nav-links a {
+      transition: color .2s ease, transform .2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.is-active {
+      color: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .primary-button,
+    .secondary-button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, color .2s ease, background .2s ease;
+    }
+
+    .primary-button {
+      color: white;
+      border: 0;
+      background: var(--blue);
+      box-shadow: 6px 6px 0 var(--ink);
+      overflow: hidden;
+    }
+
+    .primary-button::before {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0 35%, rgba(255,255,255,.34) 48%, transparent 62% 100%);
+      transform: translateX(-120%);
+      transition: transform .45s ease;
+      content: "";
+    }
+
+    .primary-button:hover {
+      background: #0049dc;
+      box-shadow: 9px 9px 0 var(--ink), 0 18px 34px rgba(0, 86, 255, .22);
+      transform: translate(-2px, -2px);
+    }
+
+    .primary-button:hover::before { transform: translateX(120%); }
+
+    .secondary-button {
+      border: 1px solid var(--ink);
+      background: white;
+    }
+
+    .secondary-button:hover {
+      color: var(--blue);
+      border-color: var(--blue);
+      box-shadow: 6px 6px 0 rgba(0, 86, 255, .16);
+      transform: translateY(-3px);
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 126px 0 72px;
+    }
+
+    .crumb {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .page-title {
+      margin: 16px 0 34px;
+    }
+
+    .page-title h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .page-title p {
+      margin: 14px 0 0;
+      color: #64748b;
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .filter-panel,
+    .content-panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      box-shadow: 0 18px 42px rgba(15, 23, 42, .08);
+      backdrop-filter: blur(16px);
+    }
+
+    .filter-panel {
+      position: sticky;
+      top: 104px;
+      padding: 20px;
+    }
+
+    .filter-head,
+    .results-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .filter-head h2,
+    .results-count {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .reset {
+      color: #64748b;
+      border: 0;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: color .2s ease, transform .2s ease;
+    }
+
+    .reset:hover {
+      color: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    .filter-group {
+      margin-top: 22px;
+    }
+
+    .filter-group label,
+    .filter-label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box input,
+    .date-row input,
+    .select-like {
+      width: 100%;
+      height: 42px;
+      padding: 0 13px;
+      color: #334155;
+      border: 1px solid #dbe4f0;
+      border-radius: 8px;
+      background: white;
+      outline: none;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .search-box span {
+      position: absolute;
+      right: 12px;
+      top: 10px;
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 10px;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .check-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .check-list input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--blue);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      padding: 7px 10px;
+      color: #475569;
+      border: 1px solid #dbe4f0;
+      border-radius: 999px;
+      background: white;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, color .2s ease, background .2s ease;
+    }
+
+    .chip:hover,
+    .chip.is-active {
+      color: var(--blue);
+      border-color: rgba(0, 86, 255, .3);
+      background: #eef4ff;
+      transform: translateY(-2px);
+    }
+
+    .date-row {
+      display: grid;
+      gap: 8px;
+    }
+
+    .status-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .status-toggle button {
+      height: 40px;
+      border: 1px solid #dbe4f0;
+      border-radius: 8px;
+      background: white;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .status-toggle button.is-active {
+      color: white;
+      border-color: var(--blue);
+      background: var(--blue);
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .pro-card {
+      margin-top: 22px;
+      padding: 18px;
+      color: white;
+      border-radius: 12px;
+      background: #0f172a;
+      box-shadow: 8px 8px 0 var(--blue);
+    }
+
+    .pro-card b {
+      display: block;
+      color: #60a5fa;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .pro-card p {
+      margin: 8px 0 14px;
+      font-size: 14px;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    .pro-card a {
+      display: flex;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px;
+      background: rgba(255,255,255,.1);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .content-panel {
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .results-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .results-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab-button {
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: background .2s ease, color .2s ease, transform .2s ease;
+    }
+
+    .tab-button:hover,
+    .tab-button.is-active {
+      color: var(--blue);
+      background: #eef4ff;
+      transform: translateY(-1px);
+    }
+
+    .sort-button,
+    .view-button {
+      height: 38px;
+      padding: 0 13px;
+      border: 1px solid #dbe4f0;
+      border-radius: 10px;
+      background: white;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
+    }
+
+    .sort-button:hover,
+    .sort-button.is-active,
+    .view-button:hover,
+    .view-button.is-active {
+      color: var(--blue);
+      border-color: rgba(0, 86, 255, .34);
+      background: #eef4ff;
+      transform: translateY(-1px);
+    }
+
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+      margin-top: 24px;
+    }
+
+    .event-grid.is-calendar {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+
+    .calendar-month {
+      border: 1px solid #dbe4f0;
+      border-radius: 14px;
+      background: white;
+      overflow: hidden;
+    }
+
+    .calendar-month h3 {
+      margin: 0;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .calendar-list {
+      display: grid;
+    }
+
+    .calendar-event {
+      display: grid;
+      grid-template-columns: 74px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(15, 23, 42, .08);
+      transition: background .2s ease;
+    }
+
+    .calendar-event:last-child { border-bottom: 0; }
+    .calendar-event:hover { background: #f8fbff; }
+
+    .calendar-date {
+      display: grid;
+      min-height: 58px;
+      place-items: center;
+      border-radius: 12px;
+      background: #eef4ff;
+      color: var(--blue);
+    }
+
+    .calendar-date strong { font-size: 22px; line-height: 1; }
+    .calendar-date span { margin-top: 4px; font-size: 11px; font-weight: 900; }
+    .calendar-event h4 { margin: 6px 0 5px; font-size: 17px; line-height: 1.4; }
+    .calendar-event p { margin: 0; color: #64748b; font-size: 13px; font-weight: 700; line-height: 1.6; }
+
+    .calendar-event a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 10px;
+      background: var(--blue);
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .event-card {
+      position: relative;
+      border: 1px solid #dbe4f0;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 14px 34px rgba(15, 23, 42, .08);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .event-card:hover {
+      border-color: rgba(0, 86, 255, .34);
+      box-shadow: 0 24px 48px rgba(0, 86, 255, .16);
+      transform: translateY(-8px);
+    }
+
+    .event-image {
+      position: relative;
+      height: 154px;
+      overflow: hidden;
+      background: #0f172a;
+    }
+
+    .event-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(.78) saturate(1.05);
+      transform: scale(1.02);
+      transition: transform .45s ease, filter .45s ease;
+    }
+
+    .event-card:hover .event-image img {
+      filter: brightness(.94) saturate(1.16);
+      transform: scale(1.12);
+    }
+
+    .d-day {
+      position: absolute;
+      left: 14px;
+      bottom: 12px;
+      padding: 6px 9px;
+      color: white;
+      border-radius: 5px;
+      background: var(--blue);
+      font-family: "Inter", sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .favorite {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      color: white;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 999px;
+      background: rgba(15, 23, 42, .52);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: background .2s ease, transform .2s ease;
+    }
+
+    .favorite:hover,
+    .favorite.is-active {
+      background: var(--blue);
+      transform: scale(1.08);
+    }
+
+    .event-info {
+      padding: 18px;
+    }
+
+    .category {
+      display: block;
+      margin-bottom: 9px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .event-info h3 {
+      min-height: 48px;
+      margin: 0 0 14px;
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 900;
+    }
+
+    .meta {
+      display: grid;
+      gap: 8px;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .deadline {
+      color: #ef4444;
+    }
+
+    .event-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .event-actions a {
+      display: flex;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: #f8fafc;
+      font-size: 13px;
+      font-weight: 900;
+      transition: transform .2s ease, background .2s ease, color .2s ease;
+    }
+
+    .event-actions a:last-child {
+      color: white;
+      background: var(--blue);
+    }
+
+    .event-actions a:hover {
+      transform: translateY(-2px);
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 36px;
+    }
+
+    .pagination button {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #dbe4f0;
+      border-radius: 8px;
+      background: white;
+      color: #64748b;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .pagination button.is-active {
+      color: white;
+      border-color: var(--blue);
+      background: var(--blue);
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+
+    @media (max-width: 1060px) {
+      .nav-links { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      .filter-panel { position: static; }
+      .event-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 680px) {
+      .nav {
+        top: 12px;
+        width: calc(100% - 24px);
+        padding: 10px 10px 10px 12px;
+        border-radius: 18px;
+      }
+      .nav-actions .secondary-button { display: none; }
+      .brand { font-size: 23px; }
+      .brand-logo { width: 126px; }
+      .shell {
+        width: calc(100% - 28px);
+        padding-top: 112px;
+      }
+      .results-head,
+      .events-header {
+        display: block;
+      }
+      .results-tools { display: block; }
+      .tool-group { margin-top: 10px; }
+      .results-tabs {
+        margin-top: 14px;
+        flex-wrap: wrap;
+      }
+      .event-grid { grid-template-columns: 1fr; }
+      .calendar-event { grid-template-columns: 58px 1fr; }
+      .calendar-event a { grid-column: 1 / -1; }
+      .page-title h1 { font-size: 38px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="nav" aria-label="주요 메뉴">
+      <a class="brand" href="index.html#top" aria-label="ILV 홈">
+        <img class="brand-logo" src="assets/logo.svg" alt="ILV" />
+      </a>
+      <nav class="nav-links">
+        <a class="is-active" href="schedule.html">전시 일정</a>
+        <a href="quote.html">견적 요청</a>
+        <a href="index.html#vendors">업체 찾기</a>
+        <a href="index.html#guide">이용 방법</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="secondary-button" href="login.html">로그인</a>
+        <a class="primary-button" href="quote.html">무료 견적</a>
+      </div>
+    </header>
+
+    <section class="shell">
+      <div class="crumb">⌂ <span>전시 일정</span></div>
+      <div class="page-title">
+        <h1>전시 일정 확인</h1>
+        <p>전국 주요 전시장을 실시간으로 확인하고 최적의 부스 파트너를 매칭받으세요.</p>
+      </div>
+
+      <div class="layout">
+        <aside class="filter-panel" aria-label="전시 일정 필터">
+          <div class="filter-head">
+            <h2>검색</h2>
+            <button class="reset" type="button">초기화</button>
+          </div>
+
+          <div class="filter-group">
+            <label for="eventSearch">전시회명 검색</label>
+            <div class="search-box">
+              <input id="eventSearch" type="search" placeholder="전시회명, 장소, 분야 검색" />
+              <span>⌕</span>
+            </div>
+          </div>
+
+          <div class="pro-card">
+            <b>PRO SERVICE</b>
+            <p>전시 전문가입찰<br />무료 컨설팅 받기</p>
+            <a href="quote.html">신청하기</a>
+          </div>
+        </aside>
+
+        <section class="content-panel">
+          <div class="results-head">
+            <div class="results-tabs">
+              <strong class="results-count">총 151개의 전시회</strong>
+              <button class="tab-button is-active" type="button">전체</button>
+              <button class="tab-button" type="button">코엑스</button>
+              <button class="tab-button" type="button">코엑스 마곡</button>
+              <button class="tab-button" type="button">킨텍스</button>
+            </div>
+          </div>
+
+          <div class="results-tools" aria-label="전시 일정 정렬 및 보기">
+            <div class="tool-group">
+              <button class="sort-button is-active" type="button" data-sort="deadline">마감 임박순</button>
+              <button class="sort-button" type="button" data-sort="dateAsc">날짜순</button>
+              <button class="sort-button" type="button" data-sort="dateDesc">최신순</button>
+              <button class="sort-button" type="button" data-sort="name">이름순</button>
+            </div>
+            <div class="tool-group">
+              <button class="view-button is-active" type="button" data-view="cards">카드 보기</button>
+              <button class="view-button" type="button" data-view="calendar">캘린더 보기</button>
+            </div>
+          </div>
+
+          <div class="event-grid">
+            <article class="event-card">
+              <div class="event-image">
+                <img src="assets/ilv-booth-hero.png" alt="AI World Expo 전시회" />
+                <span class="d-day">D-32</span>
+                <button class="favorite" type="button" aria-label="관심 전시회">♡</button>
+              </div>
+              <div class="event-info">
+                <span class="category">IT / 테크</span>
+                <h3>2024 AI World Expo & Conference</h3>
+                <div class="meta">
+                  <span>□ 2024.07.12 - 07.14</span>
+                  <span>⌖ COEX, Hall A&B</span>
+                  <span class="deadline">⊙ 신청 마감 : 06.10</span>
+                </div>
+                <div class="event-actions">
+                  <a href="event-detail.html">상세보기</a>
+                  <a href="quote.html">견적요청</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="event-card">
+              <div class="event-image">
+                <img src="assets/ilv-booth-hero.png" alt="K-Beauty Expo 전시회" />
+                <span class="d-day">D-56</span>
+                <button class="favorite is-active" type="button" aria-label="관심 전시회">♥</button>
+              </div>
+              <div class="event-info">
+                <span class="category">뷰티 / 코스메틱</span>
+                <h3>K-Beauty Expo Korea 2024</h3>
+                <div class="meta">
+                  <span>□ 2024.10.17 - 10.19</span>
+                  <span>⌖ KINTEX 제1전시장</span>
+                  <span>⊙ 신청 마감 : 08.31</span>
+                </div>
+                <div class="event-actions">
+                  <a href="event-detail.html">상세보기</a>
+                  <a href="quote.html">견적요청</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="event-card">
+              <div class="event-image">
+                <img src="assets/ilv-booth-hero.png" alt="G-STAR 전시회" />
+                <span class="d-day">D-124</span>
+                <button class="favorite" type="button" aria-label="관심 전시회">♡</button>
+              </div>
+              <div class="event-info">
+                <span class="category">문화 / 콘텐츠</span>
+                <h3>G-STAR 2024 국제게임전시회</h3>
+                <div class="meta">
+                  <span>□ 2024.11.14 - 11.17</span>
+                  <span>⌖ BEXCO 본관/신관</span>
+                  <span>⊙ 신청 마감 : 09.30</span>
+                </div>
+                <div class="event-actions">
+                  <a href="event-detail.html">상세보기</a>
+                  <a href="quote.html">견적요청</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="event-card">
+              <div class="event-image">
+                <img src="assets/ilv-booth-hero.png" alt="코리아빌드 전시회" />
+                <span class="d-day">D-15</span>
+                <button class="favorite" type="button" aria-label="관심 전시회">♡</button>
+              </div>
+              <div class="event-info">
+                <span class="category">건축 / 리빙</span>
+                <h3>2024 코리아빌드 (KOREA BUILD)</h3>
+                <div class="meta">
+                  <span>□ 2024.08.21 - 08.24</span>
+                  <span>⌖ KINTEX 전관</span>
+                  <span class="deadline">⊙ 신청 마감 : 07.20</span>
+                </div>
+                <div class="event-actions">
+                  <a href="event-detail.html">상세보기</a>
+                  <a href="quote.html">견적요청</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="event-card">
+              <div class="event-image">
+                <img src="assets/ilv-booth-hero.png" alt="BIO KOREA 전시회" />
+                <span class="d-day">D-44</span>
+                <button class="favorite" type="button" aria-label="관심 전시회">♡</button>
+              </div>
+              <div class="event-info">
+                <span class="category">의료 / 제약</span>
+                <h3>BIO KOREA 2024 바이오코리아</h3>
+                <div class="meta">
+                  <span>□ 2024.09.04 - 09.06</span>
+                  <span>⌖ COEX, Hall C</span>
+                  <span>⊙ 신청 마감 : 07.15</span>
+                </div>
+                <div class="event-actions">
+                  <a href="event-detail.html">상세보기</a>
+                  <a href="quote.html">견적요청</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="event-card">
+              <div class="event-image">
+                <img src="assets/ilv-booth-hero.png" alt="서울 카페쇼 전시회" />
+                <span class="d-day">D-80</span>
+                <button class="favorite" type="button" aria-label="관심 전시회">♡</button>
+              </div>
+              <div class="event-info">
+                <span class="category">식품 / 카페</span>
+                <h3>2024 서울 카페쇼 (Cafe Show Seoul)</h3>
+                <div class="meta">
+                  <span>□ 2024.11.06 - 11.09</span>
+                  <span>⌖ COEX 전관</span>
+                  <span>⊙ 신청 마감 : 08.15</span>
+                </div>
+                <div class="event-actions">
+                  <a href="event-detail.html">상세보기</a>
+                  <a href="quote.html">견적요청</a>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="pagination" aria-label="페이지 이동">
+            <button type="button">‹</button>
+            <button class="is-active" type="button">1</button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <button type="button">4</button>
+            <button type="button">5</button>
+            <button type="button">›</button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/schedule-local.js"></script>
+  <script>
+    const page = document.querySelector(".page");
+    if (page) {
+      page.addEventListener("pointermove", (event) => {
+        page.style.setProperty("--mx", `${event.clientX}px`);
+        page.style.setProperty("--my", `${event.clientY}px`);
+      });
+    }
+
+    document.querySelectorAll(".chip, .tab-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const group = button.parentElement;
+        group.querySelectorAll("button").forEach((item) => item.classList.remove("is-active"));
+        button.classList.add("is-active");
+      });
+    });
+
+    document.querySelectorAll(".favorite").forEach((button) => {
+      button.addEventListener("click", () => {
+        button.classList.toggle("is-active");
+        button.textContent = button.classList.contains("is-active") ? "♥" : "♡";
+      });
+    });
+
+    document.querySelectorAll(".event-card").forEach((card) => {
+      card.addEventListener("pointermove", (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        card.style.transform = `translateY(-8px) rotateX(${y * -6}deg) rotateY(${x * 6}deg)`;
+      });
+      card.addEventListener("pointerleave", () => {
+        card.style.transform = "";
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ILV | 로그인</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #07080d;
+      --paper: #E2E8F0;
+      --blue: #0056ff;
+      --muted: #64748b;
+      --line: rgba(15, 23, 42, .12);
+      --panel: rgba(255, 255, 255, .88);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at var(--mx, 72%) var(--my, 28%), rgba(0, 86, 255, .2), transparent 330px),
+        var(--paper);
+      font-family: "Noto Sans KR", "Inter", system-ui, sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+
+    .back-link {
+      position: fixed;
+      top: 18px;
+      left: max(18px, calc((100% - 1120px) / 2));
+      z-index: 20;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 16px 42px rgba(15,23,42,.1), inset 0 1px 0 rgba(255,255,255,.75);
+      backdrop-filter: blur(20px);
+      color: #172033;
+      font-size: 15px;
+      font-weight: 900;
+      transition: color .2s ease, transform .2s ease, border-color .2s ease;
+    }
+
+    .back-link:hover {
+      color: var(--blue);
+      border-color: rgba(0,86,255,.35);
+      transform: translateY(-2px);
+    }
+
+    .auth-shell {
+      display: grid;
+      grid-template-columns: minmax(0, .95fr) minmax(420px, 1fr);
+      gap: 34px;
+      width: min(1120px, calc(100% - 36px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 128px 0 64px;
+      align-items: center;
+    }
+
+    .auth-visual {
+      position: relative;
+      min-height: 560px;
+      padding: 42px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: linear-gradient(145deg, rgba(255,255,255,.72), rgba(255,255,255,.38));
+      box-shadow: 0 24px 70px rgba(15,23,42,.12), inset 0 1px 0 rgba(255,255,255,.85);
+    }
+
+    .auth-visual::before {
+      content: "";
+      position: absolute;
+      inset: 30px;
+      border-radius: 24px;
+      background:
+        linear-gradient(rgba(0,86,255,.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,86,255,.12) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+    }
+
+    .visual-copy {
+      position: relative;
+      z-index: 1;
+      max-width: 440px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      color: var(--blue);
+      border: 1px solid rgba(0,86,255,.16);
+      border-radius: 999px;
+      background: rgba(255,255,255,.8);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 22px rgba(0,86,255,.72);
+      animation: floatDot 2.2s ease-in-out infinite;
+    }
+
+    h1 {
+      margin: 26px 0 18px;
+      font-size: clamp(44px, 6vw, 76px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .visual-copy p {
+      margin: 0;
+      color: #475569;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.8;
+    }
+
+    .role-preview {
+      position: absolute;
+      right: 34px;
+      bottom: 34px;
+      left: 34px;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .preview-card {
+      padding: 20px;
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 18px;
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 16px 42px rgba(15,23,42,.1);
+      transition: transform .24s ease, border-color .24s ease;
+    }
+
+    .preview-card:hover {
+      border-color: rgba(0,86,255,.36);
+      transform: translateY(-5px);
+    }
+
+    .preview-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .preview-card span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    .auth-card {
+      padding: 34px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(15,23,42,.13), inset 0 1px 0 rgba(255,255,255,.8);
+      backdrop-filter: blur(18px);
+    }
+
+    .auth-card h2 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      line-height: 1.25;
+    }
+
+    .auth-card > p {
+      margin: 0 0 26px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .role-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .role-toggle button {
+      cursor: pointer;
+      min-height: 78px;
+      padding: 14px;
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 18px;
+      background: white;
+      text-align: left;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .role-toggle button:hover,
+    .role-toggle button.is-active {
+      border-color: rgba(0,86,255,.52);
+      box-shadow: 0 14px 30px rgba(0,86,255,.14);
+      transform: translateY(-2px);
+    }
+
+    .role-toggle strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .role-toggle span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field {
+      display: grid;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .field input {
+      width: 100%;
+      height: 54px;
+      padding: 0 16px;
+      color: var(--ink);
+      border: 1px solid rgba(15,23,42,.14);
+      border-radius: 14px;
+      outline: none;
+      background: white;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .field input:focus {
+      border-color: rgba(0,86,255,.72);
+      box-shadow: 0 0 0 4px rgba(0,86,255,.1);
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 4px 0 22px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .check input { width: 16px; height: 16px; accent-color: var(--blue); }
+
+    .submit-button {
+      cursor: pointer;
+      width: 100%;
+      height: 58px;
+      color: white;
+      border: 0;
+      border-radius: 16px;
+      background: var(--blue);
+      font-size: 17px;
+      font-weight: 900;
+      box-shadow: 0 16px 34px rgba(0,86,255,.27);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 42px rgba(0,86,255,.34);
+    }
+
+    .switch-page {
+      margin: 22px 0 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .switch-page a { color: var(--blue); font-weight: 900; }
+
+    @keyframes floatDot {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    @media (max-width: 940px) {
+      .auth-shell { grid-template-columns: 1fr; padding-top: 116px; }
+      .auth-visual { min-height: 420px; }
+    }
+
+    @media (max-width: 640px) {
+      .back-link { top: 12px; left: 12px; min-height: 40px; padding: 0 14px; font-size: 14px; }
+      .auth-shell { width: calc(100% - 24px); padding-top: 96px; }
+      .auth-visual { display: none; }
+      .auth-card { padding: 24px; border-radius: 22px; }
+      .role-toggle { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="index.html#top">← 뒤로가기</a>
+
+  <main class="auth-shell">
+    <section class="auth-visual" aria-label="ILV 로그인 소개">
+      <div class="visual-copy">
+        <span class="eyebrow">B2B 전시 부스매칭</span>
+        <h1>전시 준비를<br />한 계정에서</h1>
+        <p>기업은 견적 요청과 비교를, 시공업체는 프로젝트 제안과 상담을 빠르게 이어갑니다.</p>
+      </div>
+      <div class="role-preview">
+        <div class="preview-card">
+          <strong>기업 회원</strong>
+          <span>전시 일정 확인, 부스 견적 요청, 업체 비교</span>
+        </div>
+        <div class="preview-card">
+          <strong>시공업체 회원</strong>
+          <span>프로젝트 수신, 포트폴리오 관리, 제안 진행</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card">
+      <h2>로그인</h2>
+      <p>회원 유형을 선택한 뒤 계정 정보를 입력해주세요.</p>
+
+      <div class="role-toggle" aria-label="회원 유형 선택">
+        <button class="is-active" type="button" data-role="기업">
+          <strong>기업</strong>
+          <span>전시 부스가 필요한 고객</span>
+        </button>
+        <button type="button" data-role="시공업체">
+          <strong>시공업체</strong>
+          <span>부스 제작/시공 파트너</span>
+        </button>
+      </div>
+
+      <form class="auth-form">
+        <div class="field">
+          <label for="email">이메일</label>
+          <input id="email" type="email" placeholder="example@company.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="password">비밀번호</label>
+          <input id="password" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password" />
+        </div>
+        <div class="form-row">
+          <label class="check"><input type="checkbox" /> 로그인 유지</label>
+          <a href="#">비밀번호 찾기</a>
+        </div>
+        <button class="submit-button" type="submit"><span id="loginRole">기업</span> 계정으로 로그인</button>
+      </form>
+
+      <p class="switch-page">아직 계정이 없나요? <a href="signup.html">회원가입</a></p>
+    </section>
+  </main>
+
+  <script src="assets/env.js"></script>
+  <script src="assets/supabase-app.js"></script>
+  <script>
+    document.addEventListener("pointermove", (event) => {
+      document.body.style.setProperty("--mx", `${event.clientX}px`);
+      document.body.style.setProperty("--my", `${event.clientY}px`);
+    });
+
+    const roleLabel = document.querySelector("#loginRole");
+    document.querySelectorAll(".role-toggle button").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".role-toggle button").forEach((item) => item.classList.remove("is-active"));
+        button.classList.add("is-active");
+        roleLabel.textContent = button.dataset.role;
+      });
+    });
+
+    document.querySelector(".auth-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = event.currentTarget.querySelector(".submit-button");
+      const originalText = button.textContent;
+
+      try {
+        button.textContent = "로그인 확인 중...";
+        await window.ILV_SUPABASE.login({
+          email: document.querySelector("#email").value,
+          password: document.querySelector("#password").value,
+        });
+        button.textContent = window.ILV_SUPABASE.isConfigured() ? "로그인 완료" : "데모 모드 로그인 완료";
+      } catch (error) {
+        button.textContent = "로그인 실패";
+        alert(error.message || "로그인 중 문제가 발생했습니다.");
+      } finally {
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 1600);
+      }
+    });
+  </script>
+</body>
+</html>

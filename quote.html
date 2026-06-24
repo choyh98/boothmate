@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ILV | 무료 견적 요청</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #07080d;
+      --paper: #E2E8F0;
+      --blue: #0056ff;
+      --muted: #64748b;
+      --line: rgba(15, 23, 42, .12);
+      --panel: rgba(255, 255, 255, .9);
+      --green: #10b981;
+      --red: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at var(--mx, 70%) var(--my, 24%), rgba(0, 86, 255, .18), transparent 330px),
+        var(--paper);
+      font-family: "Noto Sans KR", "Inter", system-ui, sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+
+    .back-link {
+      position: fixed;
+      top: 18px;
+      left: max(18px, calc((100% - 1240px) / 2));
+      z-index: 20;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 16px 42px rgba(15,23,42,.1), inset 0 1px 0 rgba(255,255,255,.75);
+      backdrop-filter: blur(18px);
+      font-size: 15px;
+      font-weight: 900;
+      transition: color .2s ease, transform .2s ease, border-color .2s ease;
+    }
+
+    .back-link:hover {
+      color: var(--blue);
+      border-color: rgba(0,86,255,.4);
+      transform: translateY(-2px);
+    }
+
+    .quote-page {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 680px) 300px;
+      gap: 28px;
+      width: min(1240px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 96px 0 42px;
+      align-items: start;
+    }
+
+    .steps-panel,
+    .form-panel,
+    .summary-card,
+    .helper-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 22px 60px rgba(15,23,42,.1), inset 0 1px 0 rgba(255,255,255,.78);
+      backdrop-filter: blur(18px);
+    }
+
+    .steps-panel {
+      position: sticky;
+      top: 86px;
+      padding: 22px 14px;
+      border-radius: 22px;
+    }
+
+    .steps-panel h2 {
+      margin: 0 8px 22px;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .step-item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 10px;
+      margin-bottom: 6px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      color: var(--muted);
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .step-item:hover,
+    .step-item.is-active {
+      color: var(--ink);
+      border-color: rgba(0,86,255,.18);
+      background: white;
+      transform: translateX(2px);
+    }
+
+    .step-item.is-active {
+      box-shadow: 0 12px 30px rgba(0,86,255,.12);
+    }
+
+    .step-dot {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .step-item.is-active .step-dot {
+      color: white;
+      background: var(--blue);
+      box-shadow: 0 0 0 5px rgba(0,86,255,.1);
+    }
+
+    .step-item.is-done .step-dot {
+      color: white;
+      background: var(--blue);
+    }
+
+    .step-label {
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .form-panel {
+      min-height: 720px;
+      padding: 32px;
+      border-radius: 26px;
+    }
+
+    .form-head {
+      margin-bottom: 26px;
+    }
+
+    .form-head h1 {
+      margin: 0 0 10px;
+      font-size: 31px;
+      line-height: 1.28;
+      letter-spacing: 0;
+    }
+
+    .form-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-size: 14px; font-weight: 900; }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 1px solid rgba(15,23,42,.14);
+      border-radius: 14px;
+      outline: none;
+      background: white;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .field input,
+    .field select { height: 52px; padding: 0 14px; }
+    .field textarea { min-height: 220px; padding: 14px; resize: vertical; line-height: 1.7; }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: rgba(0,86,255,.72);
+      box-shadow: 0 0 0 4px rgba(0,86,255,.1);
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .choice-card,
+    .facility-card,
+    .event-card,
+    .budget-card,
+    .style-card {
+      cursor: pointer;
+      border: 1px solid rgba(15,23,42,.12);
+      background: white;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+
+    .choice-card:hover,
+    .facility-card:hover,
+    .event-card:hover,
+    .budget-card:hover,
+    .style-card:hover,
+    .choice-card.is-selected,
+    .facility-card.is-selected,
+    .event-card.is-selected,
+    .budget-card.is-selected,
+    .style-card.is-selected {
+      border-color: rgba(0,86,255,.62);
+      box-shadow: 0 16px 34px rgba(0,86,255,.14);
+      transform: translateY(-4px);
+    }
+
+    .event-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .event-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+      border-radius: 18px;
+    }
+
+    .event-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 9px;
+      color: var(--blue);
+      border-radius: 999px;
+      background: rgba(0,86,255,.08);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .select-button {
+      min-width: 82px;
+      height: 38px;
+      border: 0;
+      border-radius: 12px;
+      color: white;
+      background: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .sub-title {
+      margin: 26px 0 12px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .direct-box {
+      display: none;
+      padding: 18px;
+      border: 1px solid rgba(0,86,255,.16);
+      border-radius: 20px;
+      background: rgba(255,255,255,.72);
+    }
+
+    .direct-box.is-open { display: block; }
+
+    .booth-counts {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .mini-choice {
+      cursor: pointer;
+      min-height: 72px;
+      padding: 12px 8px;
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 16px;
+      background: white;
+      text-align: center;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .mini-choice:hover,
+    .mini-choice.is-selected {
+      border-color: rgba(0,86,255,.62);
+      box-shadow: 0 12px 28px rgba(0,86,255,.13);
+      transform: translateY(-3px);
+    }
+
+    .mini-choice strong { display: block; margin-bottom: 4px; font-size: 14px; }
+    .mini-choice span { color: var(--muted); font-size: 12px; font-weight: 800; }
+
+    .open-sides {
+      display: grid;
+      gap: 10px;
+    }
+
+    .open-sides button {
+      cursor: pointer;
+      height: 46px;
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 14px;
+      background: white;
+      text-align: left;
+      padding: 0 14px;
+      font-weight: 900;
+    }
+
+    .open-sides button.is-selected {
+      color: var(--blue);
+      border-color: rgba(0,86,255,.58);
+      background: rgba(0,86,255,.06);
+    }
+
+    .file-inline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px dashed rgba(0,86,255,.35);
+      border-radius: 16px;
+      background: rgba(0,86,255,.05);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .choice-card {
+      overflow: hidden;
+      border-radius: 20px;
+    }
+
+    .choice-card img {
+      width: 100%;
+      height: 148px;
+      object-fit: cover;
+      transition: transform .28s ease;
+    }
+
+    .choice-card:hover img { transform: scale(1.04); }
+
+    .choice-body {
+      padding: 16px;
+    }
+
+    .choice-body strong {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 9px;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .price-badge {
+      color: var(--blue);
+      padding: 5px 7px;
+      border-radius: 8px;
+      background: rgba(0,86,255,.08);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .choice-body p {
+      min-height: 68px;
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.65;
+    }
+
+    .stars { color: var(--blue); font-size: 13px; letter-spacing: 1px; }
+
+    .budget-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .budget-card,
+    .style-card {
+      min-height: 78px;
+      padding: 16px;
+      border-radius: 18px;
+      font-weight: 900;
+      text-align: left;
+    }
+
+    .budget-card span,
+    .style-card span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .reference-card,
+    .recommend-card {
+      margin-top: 22px;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #111827, #0f172a);
+      color: white;
+      box-shadow: 0 18px 44px rgba(15,23,42,.2);
+    }
+
+    .reference-card span,
+    .recommend-card span {
+      display: block;
+      margin-top: 8px;
+      color: #cbd5e1;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    .facility-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .facility-card {
+      min-height: 118px;
+      padding: 14px;
+      border-radius: 18px;
+    }
+
+    .facility-icon {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      color: white;
+      background: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .facility-card strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .qty-row {
+      display: none;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .facility-card.is-selected .qty-row { display: flex; }
+    .qty-row input {
+      width: 58px;
+      height: 34px;
+      padding: 0 8px;
+      border: 1px solid rgba(15,23,42,.14);
+      border-radius: 10px;
+    }
+
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .request-layout {
+      display: grid;
+      grid-template-columns: .78fr 1fr;
+      gap: 18px;
+    }
+
+    .inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .ghost-button {
+      cursor: pointer;
+      height: 42px;
+      padding: 0 14px;
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 12px;
+      background: white;
+      font-weight: 900;
+      transition: color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .ghost-button:hover {
+      color: var(--blue);
+      border-color: rgba(0,86,255,.4);
+      transform: translateY(-2px);
+    }
+
+    .drop-zone {
+      display: grid;
+      min-height: 230px;
+      place-items: center;
+      padding: 28px;
+      border: 2px dashed rgba(0,86,255,.36);
+      border-radius: 24px;
+      background: rgba(0,86,255,.05);
+      text-align: center;
+      transition: background .2s ease, border-color .2s ease;
+    }
+
+    .drop-zone:hover {
+      border-color: var(--blue);
+      background: rgba(0,86,255,.08);
+    }
+
+    .drop-zone strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .drop-zone span {
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.6;
+    }
+
+    .file-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .file-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 14px;
+      background: white;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .review-card {
+      padding: 18px;
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 18px;
+      background: white;
+    }
+
+    .review-card strong {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .review-card button {
+      border: 0;
+      background: none;
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .review-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.7;
+    }
+
+    .privacy-box {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 16px;
+      color: #0f172a;
+      background: rgba(0,86,255,.08);
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.7;
+    }
+
+    .deadline-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .done-view {
+      display: grid;
+      min-height: 620px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .done-check {
+      display: grid;
+      width: 84px;
+      height: 84px;
+      place-items: center;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      color: white;
+      background: var(--blue);
+      font-size: 34px;
+      font-weight: 900;
+      box-shadow: 0 18px 40px rgba(0,86,255,.26);
+    }
+
+    .timeline {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 28px 0;
+    }
+
+    .timeline span {
+      padding: 9px 11px;
+      border-radius: 999px;
+      background: white;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .action-left,
+    .action-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-button {
+      cursor: pointer;
+      height: 48px;
+      padding: 0 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: white;
+      font-weight: 900;
+      transition: transform .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .nav-button:hover {
+      color: var(--blue);
+      border-color: rgba(0,86,255,.4);
+      transform: translateY(-2px);
+    }
+
+    .next-button,
+    .submit-final {
+      cursor: pointer;
+      height: 50px;
+      padding: 0 26px;
+      color: white;
+      border: 0;
+      border-radius: 14px;
+      background: var(--blue);
+      font-weight: 900;
+      box-shadow: 0 16px 34px rgba(0,86,255,.26);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .next-button:hover,
+    .submit-final:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 42px rgba(0,86,255,.34);
+    }
+
+    .summary-column {
+      position: sticky;
+      top: 86px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .summary-card {
+      overflow: hidden;
+      border-radius: 22px;
+    }
+
+    .summary-head {
+      padding: 18px;
+      color: white;
+      background: #0f172a;
+      font-weight: 900;
+    }
+
+    .summary-body {
+      padding: 20px;
+    }
+
+    .summary-row {
+      display: grid;
+      gap: 6px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .summary-row:last-child { border-bottom: 0; }
+    .summary-row span { color: var(--muted); font-size: 12px; font-weight: 900; }
+    .summary-row strong { font-size: 15px; font-weight: 900; line-height: 1.5; }
+
+    .summary-price {
+      display: inline-flex;
+      width: max-content;
+      padding: 6px 9px;
+      color: var(--blue);
+      border-radius: 9px;
+      background: rgba(0,86,255,.08);
+    }
+
+    .helper-card {
+      padding: 20px;
+      border-radius: 20px;
+    }
+
+    .helper-card strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 15px;
+    }
+
+    .helper-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 1120px) {
+      .quote-page {
+        grid-template-columns: 1fr;
+        padding-top: 86px;
+      }
+
+      .steps-panel,
+      .summary-column {
+        position: relative;
+        top: auto;
+      }
+
+      .steps-panel {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .steps-panel h2 { grid-column: 1 / -1; }
+      .step-item { margin: 0; }
+      .summary-column { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .quote-page { width: calc(100% - 24px); }
+      .form-panel { padding: 22px; }
+      .grid-two,
+      .choice-grid,
+      .request-layout,
+      .review-grid,
+      .summary-column {
+        grid-template-columns: 1fr;
+      }
+      .booth-counts,
+      .budget-grid,
+      .style-grid,
+      .facility-grid,
+      .deadline-options,
+      .steps-panel {
+        grid-template-columns: 1fr 1fr;
+      }
+      .back-link { top: 12px; left: 12px; min-height: 40px; }
+      .form-actions { align-items: stretch; flex-direction: column; }
+      .action-left, .action-right { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="index.html#top">← 뒤로가기</a>
+
+  <main class="quote-page">
+    <aside class="steps-panel" aria-label="견적 요청 단계">
+      <h2>견적 요청 프로세스</h2>
+      <button class="step-item is-active" type="button" data-step="0"><span class="step-dot">1</span><span class="step-label">전시회 선택</span></button>
+      <button class="step-item" type="button" data-step="1"><span class="step-dot">2</span><span class="step-label">부스 정보</span></button>
+      <button class="step-item" type="button" data-step="2"><span class="step-dot">3</span><span class="step-label">부스 유형</span></button>
+      <button class="step-item" type="button" data-step="3"><span class="step-dot">4</span><span class="step-label">예산 규모</span></button>
+      <button class="step-item" type="button" data-step="4"><span class="step-dot">5</span><span class="step-label">필요 시설</span></button>
+      <button class="step-item" type="button" data-step="5"><span class="step-dot">6</span><span class="step-label">디자인 요청</span></button>
+      <button class="step-item" type="button" data-step="6"><span class="step-dot">7</span><span class="step-label">파일 첨부</span></button>
+      <button class="step-item" type="button" data-step="7"><span class="step-dot">8</span><span class="step-label">최종 확인</span></button>
+    </aside>
+
+    <section class="form-panel">
+      <div id="stepContent"></div>
+      <div class="form-actions" id="formActions">
+        <div class="action-left">
+          <button class="nav-button" type="button" id="prevButton">← 이전 단계</button>
+        </div>
+        <div class="action-right">
+          <button class="nav-button" type="button" id="saveButton">임시 저장</button>
+          <button class="next-button" type="button" id="nextButton">다음 단계 →</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="summary-column">
+      <section class="summary-card">
+        <div class="summary-head">실시간 견적 요약</div>
+        <div class="summary-body">
+          <div class="summary-row"><span>선택한 전시회</span><strong id="sumEvent">선택 전</strong></div>
+          <div class="summary-row"><span>부스 규모</span><strong id="sumSize">미입력</strong></div>
+          <div class="summary-row"><span>희망 부스 유형</span><strong id="sumTypes">선택 전</strong></div>
+          <div class="summary-row"><span>예산</span><strong id="sumBudget">미정</strong></div>
+          <div class="summary-row"><span>필요 시설</span><strong id="sumFacilities">선택 전</strong></div>
+          <div class="summary-row"><span>예상 견적</span><strong class="summary-price" id="sumEstimate">별도 협의</strong></div>
+          <div class="summary-row"><span>마감일</span><strong id="sumDeadline">48시간</strong></div>
+        </div>
+      </section>
+      <section class="helper-card">
+        <strong>실시간 채팅 상담</strong>
+        <p>작성 중 어려운 항목이 있으면 전문가가 요청서를 정리해드립니다.</p>
+      </section>
+    </aside>
+  </main>
+
+  <script src="assets/env.js"></script>
+  <script src="assets/supabase-app.js"></script>
+  <script>
+    const state = {
+      step: 0,
+      event: "",
+      venue: "",
+      dates: "",
+      industry: "",
+      boothCount: "",
+      area: "",
+      width: "",
+      depth: "",
+      boothNumber: "",
+      openSide: "위치 미정",
+      types: [],
+      budget: "",
+      minBudget: "",
+      maxBudget: "",
+      vat: "포함",
+      facilities: {},
+      styles: [],
+      request: "",
+      files: [],
+      deadline: "48시간",
+      completed: false
+    };
+
+    const events = [
+      ["2024 AI World Expo & Conference", "2024.07.12 - 07.14", "COEX Hall A, B", "IT / AI", "신청 진행중", "최근 본 전시회"],
+      ["K-Beauty Expo Korea 2024", "2024.10.17 - 10.19", "KINTEX 제1전시장", "뷰티 / 코스메틱", "신청 가능", "관심 전시회"],
+      ["G-STAR 2024 국제게임전시회", "2024.11.14 - 11.17", "BEXCO 컨벤션홀", "문화 / 콘텐츠", "신청 임박", "최근 본 전시회"]
+    ];
+
+    const boothTypes = [
+      ["목공 부스", "자유로운 디자인 구현이 가능하며 프리미엄하고 완성도 높은 브랜드 이미지를 전달하기에 가장 적합합니다.", "브랜드 쇼케이스, 대형 전시", "High Cost"],
+      ["블록·모듈 부스", "구획화된 모듈을 조립하여 세련되고 모던한 느낌을 줍니다. 재사용이 가능해 친환경적이며 합리적입니다.", "중형 전시, 반복 참가", "Medium Cost"],
+      ["시스템 부스", "가장 경제적인 선택지로 빠른 설치와 철거가 가능합니다. 실용적인 홍보 위주의 부스에 추천합니다.", "예산 중심, 단기 행사", "Low Cost"],
+      ["팝업형 부스", "휴대가 간편한 접이식 프레임과 그래픽 천을 활용합니다. 소규모 이벤트나 단기 행사에 효과적입니다.", "소형 행사, 프로모션", "Low Cost"],
+      ["업체 추천", "입력한 조건을 바탕으로 업체가 가장 적합한 부스 유형과 견적 조합을 직접 제안합니다.", "유형 결정 전 비교", "Recommend"]
+    ];
+
+    const facilities = ["안내데스크", "상담 테이블", "의자", "제품 전시대", "창고", "TV 모니터", "LED 스크린", "조명", "전기", "바닥 시공", "그래픽 출력", "간판", "운송", "설치", "철거"];
+    const styles = ["미니멀", "프리미엄", "테크", "친환경", "컬러풀", "따뜻한 분위기", "자유 제안"];
+
+    const stepContent = document.querySelector("#stepContent");
+    const prevButton = document.querySelector("#prevButton");
+    const nextButton = document.querySelector("#nextButton");
+    const formActions = document.querySelector("#formActions");
+
+    document.addEventListener("pointermove", (event) => {
+      document.body.style.setProperty("--mx", `${event.clientX}px`);
+      document.body.style.setProperty("--my", `${event.clientY}px`);
+    });
+
+    function render() {
+      if (state.completed) {
+        renderCompleted();
+      } else {
+        stepContent.innerHTML = getStepTemplate();
+        bindStepEvents();
+        formActions.style.display = "flex";
+        prevButton.style.visibility = state.step === 0 ? "hidden" : "visible";
+        nextButton.textContent = state.step === 7 ? "무료 견적 요청하기" : "다음 단계 →";
+      }
+      renderSteps();
+      renderSummary();
+    }
+
+    function getStepTemplate() {
+      const heads = [
+        ["참여할 전시회를 선택해주세요.", "전시회명, 장소, 기간을 확인하고 요청서를 시작하세요."],
+        ["부스 규모와 위치를 알려주세요.", "부스 수를 선택하면 예상 면적이 자동으로 계산됩니다."],
+        ["원하는 부스 유형을 선택해주세요.", "복수 선택이 가능하며, 선택한 유형은 오른쪽 요약에 바로 반영됩니다."],
+        ["예상 예산을 알려주세요.", "정확하지 않아도 괜찮습니다. 업체가 조건에 맞춰 견적을 제안합니다."],
+        ["부스에 필요한 항목을 선택해주세요.", "선택한 항목은 수량까지 입력할 수 있습니다."],
+        ["원하는 디자인과 요청사항을 알려주세요.", "지금까지 입력한 정보를 바탕으로 AI 요청 문장을 만들 수 있습니다."],
+        ["견적에 필요한 자료를 등록해주세요.", "자료 없이도 다음 단계로 이동할 수 있습니다."],
+        ["견적 요청 내용을 확인해주세요.", "수정이 필요한 항목은 각 카드에서 바로 돌아갈 수 있습니다."]
+      ];
+      return `<div class="form-head"><h1>${heads[state.step][0]}</h1><p>${heads[state.step][1]}</p></div>${[
+        eventStep,
+        boothInfoStep,
+        boothTypeStep,
+        budgetStep,
+        facilityStep,
+        designStep,
+        fileStep,
+        reviewStep
+      ][state.step]()}`;
+    }
+
+    function eventStep() {
+      return `
+        <div class="event-list">
+          ${events.map((item) => `
+            <button class="event-card ${state.event === item[0] ? "is-selected" : ""}" type="button" data-event="${item.join("|")}">
+              <div>
+                <strong>${item[0]}</strong>
+                <div class="event-meta">
+                  <span>${item[1]}</span><span>${item[2]}</span><span>${item[3]}</span>
+                  <span class="tag">${item[4]}</span><span class="tag">${item[5]}</span>
+                </div>
+              </div>
+              <span class="select-button">선택</span>
+            </button>
+          `).join("")}
+        </div>
+        <button class="ghost-button" type="button" id="directToggle">목록에 없는 전시회 직접 입력</button>
+        <div class="direct-box ${state.event === "직접 입력" ? "is-open" : ""}" id="directBox">
+          <div class="grid-two">
+            <div class="field"><label>전시회명</label><input data-key="event" value="${state.event === "직접 입력" ? "" : state.event}" placeholder="전시회명을 입력하세요" /></div>
+            <div class="field"><label>개최 장소</label><input data-key="venue" value="${state.venue}" placeholder="예: COEX Hall A" /></div>
+            <div class="field"><label>개최 기간</label><input data-key="dates" value="${state.dates}" placeholder="예: 2024.07.12 - 07.14" /></div>
+            <div class="field"><label>설치일</label><input placeholder="예: 2024.07.11" /></div>
+            <div class="field"><label>철거일</label><input placeholder="예: 2024.07.15" /></div>
+          </div>
+        </div>`;
+    }
+
+    function boothInfoStep() {
+      const counts = [["1부스", "약 9㎡", "9㎡"], ["2부스", "약 18㎡", "18㎡"], ["3부스", "약 27㎡", "27㎡"], ["4부스 이상", "별도 입력", "36㎡+"], ["아직 모름", "상담 필요", "미정"]];
+      return `
+        <div class="booth-counts">
+          ${counts.map((item) => `<button class="mini-choice ${state.boothCount === item[0] ? "is-selected" : ""}" type="button" data-count="${item[0]}" data-area="${item[2]}"><strong>${item[0]}</strong><span>${item[1]}</span></button>`).join("")}
+        </div>
+        <div class="grid-two">
+          <div class="grid-two">
+            <div class="field"><label>부스 수</label><input data-key="boothCount" value="${state.boothCount}" placeholder="예: 3부스" /></div>
+            <div class="field"><label>전체 면적</label><input data-key="area" value="${state.area}" placeholder="자동 계산" /></div>
+            <div class="field"><label>가로 길이</label><input data-key="width" value="${state.width}" placeholder="예: 9m" /></div>
+            <div class="field"><label>세로 길이</label><input data-key="depth" value="${state.depth}" placeholder="예: 3m" /></div>
+            <div class="field full"><label>부스 번호</label><input data-key="boothNumber" value="${state.boothNumber}" placeholder="예: A-120 또는 미정" /></div>
+          </div>
+          <div class="open-sides">
+            ${["1면 오픈", "2면 오픈", "3면 오픈", "4면 오픈", "위치 미정"].map((side) => `<button class="${state.openSide === side ? "is-selected" : ""}" type="button" data-open="${side}">${side}</button>`).join("")}
+          </div>
+        </div>
+        <div class="file-inline"><span>전시장 배치도 파일 첨부</span><input type="file" /></div>`;
+    }
+
+    function boothTypeStep() {
+      return `
+        <div class="choice-grid">
+          ${boothTypes.map((item) => `<button class="choice-card ${state.types.includes(item[0]) ? "is-selected" : ""}" type="button" data-type="${item[0]}">
+            <img src="assets/ilv-booth-hero.png" alt="${item[0]} 예시 이미지" />
+            <div class="choice-body">
+              <strong>${item[0]} <span class="price-badge">${item[3]}</span></strong>
+              <p>${item[1]}<br />적합한 상황: ${item[2]}</p>
+              <div class="stars">★★★★★</div>
+            </div>
+          </button>`).join("")}
+        </div>
+        <div class="recommend-card"><strong>아직 결정하지 못하셨나요?</strong><span>업체 추천을 선택하면 예산과 부스 규모에 맞는 최적 유형을 업체들이 직접 추천합니다.</span></div>`;
+    }
+
+    function budgetStep() {
+      const budgets = ["500만원 미만", "500만~1,000만원", "1,000만~1,500만원", "1,500만~3,000만원", "3,000만원 이상", "예산 미정"];
+      return `
+        <div class="budget-grid">
+          ${budgets.map((budget) => `<button class="budget-card ${state.budget === budget ? "is-selected" : ""}" type="button" data-budget="${budget}">${budget}<span>클릭하여 선택</span></button>`).join("")}
+        </div>
+        <div class="grid-two">
+          <div class="field"><label>최소 예산</label><input data-key="minBudget" value="${state.minBudget}" placeholder="예: 1200만원" /></div>
+          <div class="field"><label>최대 예산</label><input data-key="maxBudget" value="${state.maxBudget}" placeholder="예: 2000만원" /></div>
+          <div class="field full"><label>부가세 포함 여부</label><select data-key="vat"><option ${state.vat === "포함" ? "selected" : ""}>포함</option><option ${state.vat === "별도" ? "selected" : ""}>별도</option><option ${state.vat === "미정" ? "selected" : ""}>미정</option></select></div>
+        </div>
+        <div class="reference-card"><strong>선택한 부스 규모의 평균 견적 범위</strong><span>${state.types[0] || "목공부스"} ${state.boothCount || "3부스"} 기준 예상 견적 범위 1,200만~2,000만원입니다. 이 값은 참고 정보로만 표시됩니다.</span></div>`;
+    }
+
+    function facilityStep() {
+      return `<div class="facility-grid">
+        ${facilities.map((name, index) => `<button class="facility-card ${state.facilities[name] ? "is-selected" : ""}" type="button" data-facility="${name}">
+          <span class="facility-icon">${String(index + 1).padStart(2, "0")}</span>
+          <strong>${name}</strong>
+          <span class="qty-row">수량 <input type="number" min="1" value="${state.facilities[name] || 1}" data-qty="${name}" /> 개</span>
+        </button>`).join("")}
+      </div>`;
+    }
+
+    function designStep() {
+      return `<div class="request-layout">
+        <div>
+          <div class="style-grid">
+            ${styles.map((style) => `<button class="style-card ${state.styles.includes(style) ? "is-selected" : ""}" type="button" data-style="${style}">${style}<span>선택 가능</span></button>`).join("")}
+          </div>
+        </div>
+        <div class="field">
+          <label>요청사항</label>
+          <textarea id="requestText" placeholder="예: 3부스 규모로 목공부스와 블록부스 견적을 각각 받고 싶습니다.">${state.request}</textarea>
+          <div class="inline-actions">
+            <button class="ghost-button" type="button" id="aiWrite">AI 요청사항 자동 작성</button>
+            <button class="ghost-button" type="button" id="loadRequest">기존 요청사항 불러오기</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function fileStep() {
+      return `
+        <label class="drop-zone">
+          <input id="fileInput" type="file" multiple hidden />
+          <span><strong>파일을 드래그하거나 클릭해서 업로드</strong>회사 로고, 부스 배치도, 제품 이미지, 기존 부스 사진, 참고 디자인, 회사소개서, 브랜드 가이드 등록 가능</span>
+        </label>
+        <div class="file-list" id="fileList">
+          ${(state.files.length ? state.files : ["회사 로고.ai", "제품 이미지.zip"]).map((name, index) => `<div class="file-row"><span>${name}</span><span class="tag">업로드 완료</span><button class="ghost-button" type="button" data-remove-file="${index}">삭제</button></div>`).join("")}
+        </div>`;
+    }
+
+    function reviewStep() {
+      const cards = [
+        ["전시회 정보", `${state.event || "미선택"} / ${state.venue || "장소 미정"} / ${state.dates || "기간 미정"}`, 0],
+        ["부스 정보", `${state.boothCount || "미입력"} / ${state.area || "면적 미정"} / ${state.openSide}`, 1],
+        ["부스 유형", state.types.join(", ") || "선택 전", 2],
+        ["예산", state.budget || `${state.minBudget || "최소 미정"} ~ ${state.maxBudget || "최대 미정"}`, 3],
+        ["시설 및 집기", facilityText(), 4],
+        ["디자인 요청", state.request || "요청사항 미입력", 5],
+        ["첨부파일", (state.files.length ? state.files.join(", ") : "자료 없이 진행"), 6]
+      ];
+      return `
+        <div class="review-grid">
+          ${cards.map((card) => `<div class="review-card"><strong>${card[0]}<button type="button" data-edit="${card[2]}">수정</button></strong><p>${card[1]}</p></div>`).join("")}
+        </div>
+        <div class="privacy-box">업체를 선택하기 전까지 회사 연락처와 담당자 정보는 공개되지 않습니다.</div>
+        <div class="sub-title">견적 마감 설정</div>
+        <div class="deadline-options">
+          ${["24시간", "48시간", "72시간", "직접 설정"].map((time) => `<button class="budget-card ${state.deadline === time ? "is-selected" : ""}" type="button" data-deadline="${time}">${time}</button>`).join("")}
+        </div>`;
+    }
+
+    function renderCompleted() {
+      stepContent.innerHTML = `
+        <div class="done-view">
+          <div>
+            <div class="done-check">✓</div>
+            <div class="form-head">
+              <h1>견적 요청이 등록되었습니다.</h1>
+              <p>검토 후 조건에 맞는 시공업체에게 요청서가 전달됩니다.</p>
+            </div>
+            <div class="timeline"><span>요청서 검토</span><span>업체 모집</span><span>견적 접수</span><span>견적 비교</span><span>업체 선택</span></div>
+            <div class="inline-actions" style="justify-content:center">
+              <a class="next-button" href="schedule.html">내 견적 현황 보기</a>
+              <button class="ghost-button" type="button" onclick="state.completed=false; state.step=7; render();">요청서 수정하기</button>
+              <button class="ghost-button" type="button" onclick="location.reload()">새로운 견적 요청</button>
+            </div>
+          </div>
+        </div>`;
+      formActions.style.display = "none";
+    }
+
+    function bindStepEvents() {
+      document.querySelectorAll("[data-event]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const [event, dates, venue, industry] = button.dataset.event.split("|");
+          Object.assign(state, { event, dates, venue, industry });
+          render();
+        });
+      });
+
+      const directToggle = document.querySelector("#directToggle");
+      if (directToggle) {
+        directToggle.addEventListener("click", () => {
+          state.event = "직접 입력";
+          render();
+        });
+      }
+
+      document.querySelectorAll("[data-key]").forEach((input) => {
+        input.addEventListener("input", () => {
+          state[input.dataset.key] = input.value;
+          renderSummary();
+        });
+        input.addEventListener("change", () => {
+          state[input.dataset.key] = input.value;
+          renderSummary();
+        });
+      });
+
+      document.querySelectorAll("[data-count]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.boothCount = button.dataset.count;
+          state.area = button.dataset.area;
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-open]").forEach((button) => button.addEventListener("click", () => {
+        state.openSide = button.dataset.open;
+        render();
+      }));
+
+      document.querySelectorAll("[data-type]").forEach((button) => button.addEventListener("click", () => {
+        toggleArray(state.types, button.dataset.type);
+        render();
+      }));
+
+      document.querySelectorAll("[data-budget]").forEach((button) => button.addEventListener("click", () => {
+        state.budget = button.dataset.budget;
+        render();
+      }));
+
+      document.querySelectorAll("[data-facility]").forEach((button) => button.addEventListener("click", (event) => {
+        if (event.target.matches("input")) return;
+        const name = button.dataset.facility;
+        if (state.facilities[name]) delete state.facilities[name];
+        else state.facilities[name] = 1;
+        render();
+      }));
+
+      document.querySelectorAll("[data-qty]").forEach((input) => input.addEventListener("input", () => {
+        state.facilities[input.dataset.qty] = input.value;
+        renderSummary();
+      }));
+
+      document.querySelectorAll("[data-style]").forEach((button) => button.addEventListener("click", () => {
+        toggleArray(state.styles, button.dataset.style);
+        render();
+      }));
+
+      const requestText = document.querySelector("#requestText");
+      if (requestText) requestText.addEventListener("input", () => {
+        state.request = requestText.value;
+      });
+
+      const aiWrite = document.querySelector("#aiWrite");
+      if (aiWrite) aiWrite.addEventListener("click", () => {
+        state.request = `${state.boothCount || "3부스"} 규모로 ${state.types.join("와 ") || "목공부스와 블록부스"} 견적을 비교하고 싶습니다. 필요 시설은 ${facilityText()}이며, ${state.styles.join(", ") || "프리미엄"} 분위기의 디자인 제안을 받고 싶습니다.`;
+        render();
+      });
+
+      const loadRequest = document.querySelector("#loadRequest");
+      if (loadRequest) loadRequest.addEventListener("click", () => {
+        state.request = "제품 전시대와 상담 공간을 명확히 분리하고, 브랜드 컬러가 잘 보이는 개방형 부스로 제안해주세요.";
+        render();
+      });
+
+      const fileInput = document.querySelector("#fileInput");
+      if (fileInput) fileInput.addEventListener("change", () => {
+        state.files = [...fileInput.files].map((file) => `${file.name} (${Math.max(1, Math.round(file.size / 1024))}KB)`);
+        render();
+      });
+
+      document.querySelectorAll("[data-remove-file]").forEach((button) => button.addEventListener("click", () => {
+        state.files.splice(Number(button.dataset.removeFile), 1);
+        render();
+      }));
+
+      document.querySelectorAll("[data-edit]").forEach((button) => button.addEventListener("click", () => {
+        state.step = Number(button.dataset.edit);
+        render();
+      }));
+
+      document.querySelectorAll("[data-deadline]").forEach((button) => button.addEventListener("click", () => {
+        state.deadline = button.dataset.deadline;
+        render();
+      }));
+    }
+
+    function toggleArray(target, value) {
+      const index = target.indexOf(value);
+      if (index >= 0) target.splice(index, 1);
+      else target.push(value);
+    }
+
+    function renderSteps() {
+      document.querySelectorAll(".step-item").forEach((button) => {
+        const index = Number(button.dataset.step);
+        button.classList.toggle("is-active", index === state.step && !state.completed);
+        button.classList.toggle("is-done", index < state.step || state.completed);
+        button.querySelector(".step-dot").textContent = index < state.step || state.completed ? "✓" : String(index + 1);
+      });
+    }
+
+    function renderSummary() {
+      const eventName = state.event && state.event !== "직접 입력" ? state.event : state.event || "선택 전";
+      document.querySelector("#sumEvent").textContent = eventName;
+      document.querySelector("#sumSize").textContent = [state.boothCount, state.area].filter(Boolean).join(" · ") || "미입력";
+      document.querySelector("#sumTypes").textContent = state.types.join(", ") || "선택 전";
+      document.querySelector("#sumBudget").textContent = state.budget || [state.minBudget, state.maxBudget].filter(Boolean).join(" ~ ") || "미정";
+      document.querySelector("#sumFacilities").textContent = facilityText();
+      document.querySelector("#sumEstimate").textContent = estimateText();
+      document.querySelector("#sumDeadline").textContent = state.deadline;
+    }
+
+    function facilityText() {
+      const selected = Object.entries(state.facilities).map(([name, qty]) => `${name} ${qty}개`);
+      return selected.length ? selected.join(", ") : "선택 전";
+    }
+
+    function estimateText() {
+      if (state.budget && state.budget !== "예산 미정") return state.budget;
+      if (state.types.includes("목공 부스")) return "1,200만~2,000만원";
+      if (state.types.length) return "700만~1,500만원";
+      return "별도 협의";
+    }
+
+    document.querySelectorAll(".step-item").forEach((button) => button.addEventListener("click", () => {
+      state.step = Number(button.dataset.step);
+      state.completed = false;
+      render();
+    }));
+
+    prevButton.addEventListener("click", () => {
+      state.step = Math.max(0, state.step - 1);
+      render();
+    });
+
+    nextButton.addEventListener("click", async () => {
+      if (state.step === 7) {
+        const originalText = nextButton.textContent;
+        try {
+          nextButton.textContent = "요청 등록 중...";
+          await window.ILV_SUPABASE.saveQuoteRequest(state);
+          state.completed = true;
+        } catch (error) {
+          alert(error.message || "견적 요청 저장 중 문제가 발생했습니다.");
+          nextButton.textContent = originalText;
+          return;
+        }
+      } else {
+        state.step += 1;
+      }
+      render();
+    });
+
+    document.querySelector("#saveButton").addEventListener("click", () => {
+      const original = document.querySelector("#saveButton").textContent;
+      document.querySelector("#saveButton").textContent = "저장 완료";
+      setTimeout(() => document.querySelector("#saveButton").textContent = original, 1200);
+    });
+
+    render();
+  </script>
+</body>
+</html>

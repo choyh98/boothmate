@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ILV | 회원가입</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #07080d;
+      --paper: #E2E8F0;
+      --blue: #0056ff;
+      --muted: #64748b;
+      --line: rgba(15, 23, 42, .12);
+      --panel: rgba(255, 255, 255, .88);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at var(--mx, 22%) var(--my, 24%), rgba(0, 86, 255, .2), transparent 330px),
+        var(--paper);
+      font-family: "Noto Sans KR", "Inter", system-ui, sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; }
+
+    .back-link {
+      position: fixed;
+      top: 18px;
+      left: max(18px, calc((100% - 1120px) / 2));
+      z-index: 20;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 16px 42px rgba(15,23,42,.1), inset 0 1px 0 rgba(255,255,255,.75);
+      backdrop-filter: blur(20px);
+      color: #172033;
+      font-size: 15px;
+      font-weight: 900;
+      transition: color .2s ease, transform .2s ease, border-color .2s ease;
+    }
+
+    .back-link:hover {
+      border-color: rgba(0,86,255,.4);
+      color: var(--blue);
+      transform: translateY(-2px);
+    }
+
+    .signup-shell {
+      width: min(1120px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 128px 0 64px;
+    }
+
+    .page-head {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(360px, .55fr);
+      gap: 30px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+
+    .page-head h1 {
+      margin: 0 0 14px;
+      font-size: clamp(42px, 6vw, 72px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .page-head p {
+      margin: 0;
+      color: #475569;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.75;
+    }
+
+    .mini-panel {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.74);
+      box-shadow: 0 18px 46px rgba(15,23,42,.1);
+    }
+
+    .mini-panel strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--blue);
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .mini-panel span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    .signup-card {
+      display: grid;
+      grid-template-columns: minmax(320px, .42fr) minmax(0, 1fr);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: 0 26px 76px rgba(15,23,42,.13), inset 0 1px 0 rgba(255,255,255,.8);
+      backdrop-filter: blur(18px);
+    }
+
+    .role-side {
+      padding: 26px;
+      border-right: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(0,86,255,.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,86,255,.1) 1px, transparent 1px),
+        rgba(248,250,252,.7);
+      background-size: 32px 32px;
+    }
+
+    .role-side h2 {
+      margin: 0 0 18px;
+      font-size: 24px;
+    }
+
+    .role-card {
+      cursor: pointer;
+      width: 100%;
+      padding: 20px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 20px;
+      background: rgba(255,255,255,.9);
+      text-align: left;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+
+    .role-card:hover,
+    .role-card.is-active {
+      border-color: rgba(0,86,255,.55);
+      box-shadow: 0 18px 38px rgba(0,86,255,.14);
+      transform: translateY(-4px);
+    }
+
+    .role-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .role-card span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    .form-side {
+      padding: 30px;
+    }
+
+    .form-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .form-title h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .selected-badge {
+      padding: 9px 12px;
+      color: var(--blue);
+      border: 1px solid rgba(0,86,255,.18);
+      border-radius: 999px;
+      background: rgba(0,86,255,.08);
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 9px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    .field label {
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      height: 54px;
+      padding: 0 16px;
+      color: var(--ink);
+      border: 1px solid rgba(15,23,42,.14);
+      border-radius: 14px;
+      outline: none;
+      background: white;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: rgba(0,86,255,.72);
+      box-shadow: 0 0 0 4px rgba(0,86,255,.1);
+    }
+
+    .agree-box {
+      display: grid;
+      gap: 11px;
+      margin: 22px 0;
+      padding: 16px;
+      border: 1px solid rgba(15,23,42,.1);
+      border-radius: 18px;
+      background: rgba(255,255,255,.74);
+      color: #475569;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .agree-box label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .agree-box input { width: 16px; height: 16px; accent-color: var(--blue); }
+
+    .submit-button {
+      cursor: pointer;
+      width: 100%;
+      height: 60px;
+      color: white;
+      border: 0;
+      border-radius: 16px;
+      background: var(--blue);
+      font-size: 17px;
+      font-weight: 900;
+      box-shadow: 0 16px 34px rgba(0,86,255,.27);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 42px rgba(0,86,255,.34);
+    }
+
+    @media (max-width: 940px) {
+      .page-head { grid-template-columns: 1fr; }
+      .signup-card { grid-template-columns: 1fr; }
+      .role-side { border-right: 0; border-bottom: 1px solid var(--line); }
+    }
+
+    @media (max-width: 640px) {
+      .back-link { top: 12px; left: 12px; min-height: 40px; padding: 0 14px; font-size: 14px; }
+      .signup-shell { width: calc(100% - 24px); padding-top: 96px; }
+      .page-head h1 { font-size: 42px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-title { align-items: flex-start; flex-direction: column; }
+      .role-side, .form-side { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="index.html#top">← 뒤로가기</a>
+
+  <main class="signup-shell">
+    <section class="page-head">
+      <div>
+        <h1>회원가입</h1>
+        <p>기업과 시공업체의 업무 흐름이 달라서 가입 단계부터 계정을 나눠 관리합니다.</p>
+      </div>
+      <div class="mini-panel">
+        <strong>ILV 계정 유형</strong>
+        <span>기업은 견적 요청 중심, 시공업체는 프로젝트 수신과 포트폴리오 중심으로 설정됩니다.</span>
+      </div>
+    </section>
+
+    <section class="signup-card">
+      <aside class="role-side">
+        <h2>가입 유형 선택</h2>
+        <button class="role-card is-active" type="button" data-role="기업" data-subtitle="기업 정보">
+          <strong>기업 회원</strong>
+          <span>전시 참가 기업, 브랜드, 마케팅 담당자용 계정</span>
+        </button>
+        <button class="role-card" type="button" data-role="시공업체" data-subtitle="업체 정보">
+          <strong>시공업체 회원</strong>
+          <span>부스 디자인, 제작, 설치를 수행하는 파트너 계정</span>
+        </button>
+      </aside>
+
+      <section class="form-side">
+        <div class="form-title">
+          <h2><span id="roleName">기업</span> 회원 정보</h2>
+          <span class="selected-badge" id="roleBadge">기업 정보</span>
+        </div>
+
+        <form class="signup-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="company">회사명</label>
+              <input id="company" type="text" placeholder="회사명을 입력하세요" />
+            </div>
+            <div class="field">
+              <label for="manager">담당자명</label>
+              <input id="manager" type="text" placeholder="담당자명" />
+            </div>
+            <div class="field">
+              <label for="email">이메일</label>
+              <input id="email" type="email" placeholder="example@company.com" autocomplete="email" />
+            </div>
+            <div class="field">
+              <label for="phone">연락처</label>
+              <input id="phone" type="tel" placeholder="010-0000-0000" />
+            </div>
+            <div class="field">
+              <label for="password">비밀번호</label>
+              <input id="password" type="password" placeholder="8자 이상 입력" autocomplete="new-password" />
+            </div>
+            <div class="field">
+              <label for="passwordConfirm">비밀번호 확인</label>
+              <input id="passwordConfirm" type="password" placeholder="한 번 더 입력" autocomplete="new-password" />
+            </div>
+            <div class="field full" id="roleSpecificField">
+              <label for="interest">관심 전시 분야</label>
+              <select id="interest">
+                <option>IT / 테크</option>
+                <option>뷰티 / 코스메틱</option>
+                <option>문화 / 콘텐츠</option>
+                <option>건축 / 리빙</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="agree-box">
+            <label><input type="checkbox" /> 서비스 이용약관에 동의합니다.</label>
+            <label><input type="checkbox" /> 개인정보 처리방침에 동의합니다.</label>
+          </div>
+
+          <button class="submit-button" type="submit"><span id="submitRole">기업</span> 회원가입</button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script src="assets/env.js"></script>
+  <script src="assets/supabase-app.js"></script>
+  <script>
+    document.addEventListener("pointermove", (event) => {
+      document.body.style.setProperty("--mx", `${event.clientX}px`);
+      document.body.style.setProperty("--my", `${event.clientY}px`);
+    });
+
+    const roleName = document.querySelector("#roleName");
+    const roleBadge = document.querySelector("#roleBadge");
+    const submitRole = document.querySelector("#submitRole");
+    const roleSpecificField = document.querySelector("#roleSpecificField");
+
+    document.querySelectorAll(".role-card").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".role-card").forEach((item) => item.classList.remove("is-active"));
+        button.classList.add("is-active");
+
+        const role = button.dataset.role;
+        roleName.textContent = role;
+        roleBadge.textContent = button.dataset.subtitle;
+        submitRole.textContent = role;
+
+        if (role === "시공업체") {
+          roleSpecificField.innerHTML = `
+            <label for="specialty">주요 시공 분야</label>
+            <select id="specialty">
+              <option>독립부스 제작</option>
+              <option>블록부스 / 조립부스</option>
+              <option>3D 시안 / 디자인</option>
+              <option>해외 전시 시공</option>
+            </select>
+          `;
+        } else {
+          roleSpecificField.innerHTML = `
+            <label for="interest">관심 전시 분야</label>
+            <select id="interest">
+              <option>IT / 테크</option>
+              <option>뷰티 / 코스메틱</option>
+              <option>문화 / 콘텐츠</option>
+              <option>건축 / 리빙</option>
+            </select>
+          `;
+        }
+      });
+    });
+
+    document.querySelector(".signup-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = event.currentTarget.querySelector(".submit-button");
+      const originalText = button.textContent;
+      const activeRole = document.querySelector(".role-card.is-active").dataset.role;
+      const specialtyInput = document.querySelector("#specialty") || document.querySelector("#interest");
+
+      try {
+        button.textContent = "가입 처리 중...";
+        await window.ILV_SUPABASE.signup({
+          email: document.querySelector("#email").value,
+          password: document.querySelector("#password").value,
+          role: activeRole,
+          profile: {
+            companyName: document.querySelector("#company").value,
+            managerName: document.querySelector("#manager").value,
+            phone: document.querySelector("#phone").value,
+            specialty: specialtyInput ? specialtyInput.value : "",
+          },
+        });
+        button.textContent = window.ILV_SUPABASE.isConfigured() ? "가입 완료" : "데모 모드 가입 완료";
+      } catch (error) {
+        button.textContent = "가입 실패";
+        alert(error.message || "회원가입 중 문제가 발생했습니다.");
+      } finally {
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 1600);
+      }
+    });
+  </script>
+</body>
+</html>
