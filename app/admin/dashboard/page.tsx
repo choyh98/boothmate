@@ -1,0 +1,38 @@
+import { AppShell } from "@/components/app-shell";
+import { LogoutButton } from "@/components/auth/logout-button";
+import { requireRole } from "@/lib/auth/require-role";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminDashboardPage() {
+  const context = await requireRole("admin");
+
+  return (
+    <AppShell>
+      <main className="mx-auto w-full max-w-6xl px-5 py-12 md:px-8">
+        <section className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft md:p-8">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">
+                Admin Dashboard
+              </p>
+              <h1 className="mt-3 text-3xl font-black text-booth-ink">
+                관리자 대시보드
+              </h1>
+            </div>
+            <LogoutButton />
+          </div>
+          <div className="mt-8 rounded-2xl border border-booth-line bg-slate-50 p-5">
+            <p className="text-sm font-black text-booth-muted">관리자 여부</p>
+            <p className="mt-2 text-xl font-black text-booth-ink">
+              {context.profile.role === "admin" ? "관리자 계정입니다." : "관리자 계정이 아닙니다."}
+            </p>
+          </div>
+          <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm font-bold leading-7 text-blue-800">
+            실제 관리 기능은 다음 단계에서 구현됩니다.
+          </div>
+        </section>
+      </main>
+    </AppShell>
+  );
+}
