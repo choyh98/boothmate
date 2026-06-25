@@ -232,9 +232,9 @@ export function QuoteRequestWizard({
         ) : null}
 
         {step === 6 ? (
-          <StepBlock title="첨부자료는 다음 단계에서 지원됩니다.">
+          <StepBlock title="첨부자료 업로드는 준비 중입니다.">
             <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50 p-6 text-sm font-bold leading-7 text-blue-800">
-              이번 Phase 3에서는 실제 파일 업로드를 제외했습니다. 로고, 배치도, 참고 이미지는 다음 Phase에서 Supabase Storage로 연결합니다.
+              로고, 배치도, 참고 이미지 업로드는 아직 제공하지 않습니다. 필요한 자료는 요청사항에 텍스트로 적어주세요.
             </div>
           </StepBlock>
         ) : null}

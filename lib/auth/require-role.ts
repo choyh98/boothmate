@@ -11,7 +11,7 @@ export async function requireRole(role: UserRole) {
   }
 
   if (context.profile.role !== role) {
-    redirect(getDashboardPath(context.profile.role));
+    redirect("/access-denied");
   }
 
   return context;

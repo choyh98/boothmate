@@ -1,38 +1,67 @@
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { LogoutButton } from "@/components/auth/logout-button";
+import { ErrorState } from "@/components/ui/state";
 import { requireRole } from "@/lib/auth/require-role";
+import { getAdminMetrics } from "@/lib/admin/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const context = await requireRole("admin");
+  let metrics;
+  let errorMessage = "";
+
+  try {
+    metrics = await getAdminMetrics();
+  } catch (error) {
+    errorMessage = error instanceof Error ? error.message : "관리자 지표를 불러오지 못했습니다.";
+  }
 
   return (
     <AppShell>
       <main className="mx-auto w-full max-w-6xl px-5 py-12 md:px-8">
-        <section className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft md:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">
-                Admin Dashboard
-              </p>
-              <h1 className="mt-3 text-3xl font-black text-booth-ink">
-                관리자 대시보드
-              </h1>
-            </div>
-            <LogoutButton />
-          </div>
-          <div className="mt-8 rounded-2xl border border-booth-line bg-slate-50 p-5">
-            <p className="text-sm font-black text-booth-muted">관리자 여부</p>
-            <p className="mt-2 text-xl font-black text-booth-ink">
-              {context.profile.role === "admin" ? "관리자 계정입니다." : "관리자 계정이 아닙니다."}
-            </p>
-          </div>
-          <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm font-bold leading-7 text-blue-800">
-            실제 관리 기능은 다음 단계에서 구현됩니다.
-          </div>
+        <div className="mb-8">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">Admin Dashboard</p>
+          <h1 className="mt-3 text-4xl font-black text-booth-ink">관리자 대시보드</h1>
+          <p className="mt-3 text-base font-semibold text-booth-muted">
+            {context.profile.name ?? context.email ?? "관리자"} 계정으로 접속 중입니다.
+          </p>
+        </div>
+        {errorMessage ? <ErrorState title="지표 오류" description={errorMessage} /> : null}
+        {metrics ? (
+          <section className="grid gap-4 md:grid-cols-4">
+            <Metric label="참여기업" value={metrics.company_count} />
+            <Metric label="전시업체" value={metrics.contractor_count} />
+            <Metric label="인증 업체" value={metrics.verified_contractor_count} />
+            <Metric label="활성 구독 업체" value={metrics.active_subscription_contractor_count} />
+            <Metric label="공개 요청" value={metrics.open_quote_request_count} />
+            <Metric label="제출 견적" value={metrics.submitted_quote_count} />
+            <Metric label="선택 완료 요청" value={metrics.selected_quote_request_count} />
+          </section>
+        ) : null}
+        <section className="mt-8 grid gap-4 md:grid-cols-3">
+          {[
+            ["전시회 관리", "/admin/exhibitions"],
+            ["전시업체 관리", "/admin/contractors"],
+            ["사용자 관리", "/admin/users"],
+            ["견적 요청 관리", "/admin/quote-requests"],
+            ["제출 견적 관리", "/admin/quotes"]
+          ].map(([label, href]) => (
+            <Link className="rounded-[24px] border border-white/80 bg-white p-5 text-sm font-black text-booth-ink shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200" href={href} key={href}>
+              {label}
+            </Link>
+          ))}
         </section>
       </main>
     </AppShell>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-[24px] border border-white/80 bg-white p-5 shadow-sm">
+      <p className="text-sm font-black text-booth-muted">{label}</p>
+      <p className="mt-2 text-3xl font-black text-booth-ink">{value}</p>
+    </div>
   );
 }

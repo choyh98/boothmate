@@ -30,6 +30,7 @@ export type QuoteRequest = {
   deadline: string | null;
   status: QuoteRequestStatus;
   selected_quote_id: string | null;
+  selected_at?: string | null;
   created_at: string;
   updated_at: string;
   exhibitions?: Pick<Exhibition, "id" | "title" | "venue" | "venue_group" | "start_date" | "end_date" | "industry"> | null;

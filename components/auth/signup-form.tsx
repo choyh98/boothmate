@@ -47,17 +47,17 @@ export function SignupForm({ role, configReady }: SignupFormProps) {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm font-black text-booth-ink">
-          담당자 이름
-          <input className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue focus:bg-white" name="name" required />
+          담당자 이름 <span className="text-xs text-booth-muted">선택</span>
+          <input className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue focus:bg-white" name="name" />
         </label>
         <label className="grid gap-2 text-sm font-black text-booth-ink">
-          연락처
-          <input className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue focus:bg-white" name="phone" required />
+          연락처 <span className="text-xs text-booth-muted">선택</span>
+          <input className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue focus:bg-white" name="phone" />
         </label>
       </div>
       <label className="grid gap-2 text-sm font-black text-booth-ink">
-        {isContractor ? "업체명" : "회사명"}
-        <input className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue focus:bg-white" name="companyName" required />
+        {isContractor ? "업체명" : "회사명"} <span className="text-xs text-booth-muted">선택</span>
+        <input className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue focus:bg-white" name="companyName" />
       </label>
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm font-black text-booth-ink">

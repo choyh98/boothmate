@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { ExhibitionCard } from "@/components/exhibitions/exhibition-card";
-import { listExhibitions } from "@/lib/exhibitions/queries";
+import { getExhibitionFilterOptions, listExhibitions } from "@/lib/exhibitions/queries";
 import type { Exhibition } from "@/types/exhibition";
 
 export const dynamic = "force-dynamic";
@@ -10,21 +10,29 @@ type ExhibitionsPageProps = {
   searchParams?: {
     q?: string;
     venue?: string;
+    region?: string;
+    industry?: string;
     sort?: "deadline" | "dateAsc" | "dateDesc" | "name";
   };
 };
 
-const venues = ["all", "코엑스", "코엑스 마곡", "킨텍스"];
-
 export default async function ExhibitionsPage({ searchParams }: ExhibitionsPageProps) {
   const query = searchParams?.q ?? "";
   const venue = searchParams?.venue ?? "all";
+  const region = searchParams?.region ?? "all";
+  const industry = searchParams?.industry ?? "all";
   const sort = searchParams?.sort ?? "dateAsc";
   let exhibitions: Exhibition[] = [];
+  let filterOptions = { venueGroups: [] as string[], regions: [] as string[], industries: [] as string[] };
   let errorMessage = "";
 
   try {
-    exhibitions = await listExhibitions({ query, venueGroup: venue, sort });
+    const [items, options] = await Promise.all([
+      listExhibitions({ query, venueGroup: venue, region, industry, sort }),
+      getExhibitionFilterOptions()
+    ]);
+    exhibitions = items;
+    filterOptions = options;
   } catch (error) {
     errorMessage =
       error instanceof Error
@@ -42,7 +50,7 @@ export default async function ExhibitionsPage({ searchParams }: ExhibitionsPageP
             </p>
             <h1 className="mt-3 text-4xl font-black text-booth-ink">전시 일정 확인</h1>
             <p className="mt-3 text-base font-semibold text-booth-muted">
-              Supabase exhibitions 테이블에서 조회한 전시회 목록입니다.
+              공개 중인 전시회를 검색하고 조건별로 골라볼 수 있습니다.
             </p>
           </div>
           <Link
@@ -53,9 +61,9 @@ export default async function ExhibitionsPage({ searchParams }: ExhibitionsPageP
           </Link>
         </div>
 
-        <form className="mb-6 grid gap-3 rounded-2xl border border-white/80 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto_auto]" action="/exhibitions">
+        <form className="mb-6 grid gap-3 rounded-2xl border border-white/80 bg-white p-4 shadow-sm md:grid-cols-6" action="/exhibitions">
           <input
-            className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-booth-blue focus:bg-white"
+            className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-booth-blue focus:bg-white md:col-span-2"
             defaultValue={query}
             name="q"
             placeholder="전시회명, 장소, 산업 검색"
@@ -65,9 +73,34 @@ export default async function ExhibitionsPage({ searchParams }: ExhibitionsPageP
             defaultValue={venue}
             name="venue"
           >
-            {venues.map((item) => (
+            <option value="all">전체 전시장</option>
+            {filterOptions.venueGroups.map((item) => (
               <option key={item} value={item}>
-                {item === "all" ? "전체 전시장" : item}
+                {item}
+              </option>
+            ))}
+          </select>
+          <select
+            className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-black outline-none focus:border-booth-blue"
+            defaultValue={region}
+            name="region"
+          >
+            <option value="all">전체 지역</option>
+            {filterOptions.regions.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <select
+            className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-black outline-none focus:border-booth-blue"
+            defaultValue={industry}
+            name="industry"
+          >
+            <option value="all">전체 산업</option>
+            {filterOptions.industries.map((item) => (
+              <option key={item} value={item}>
+                {item}
               </option>
             ))}
           </select>
@@ -78,12 +111,24 @@ export default async function ExhibitionsPage({ searchParams }: ExhibitionsPageP
           >
             <option value="dateAsc">날짜순</option>
             <option value="dateDesc">최신순</option>
+            <option value="deadline">종료 임박순</option>
             <option value="name">이름순</option>
           </select>
-          <button className="rounded-xl bg-booth-blue px-5 py-3 text-sm font-black text-white md:col-start-3" type="submit">
+          <button className="rounded-xl bg-booth-blue px-5 py-3 text-sm font-black text-white" type="submit">
             검색
           </button>
         </form>
+
+        {!errorMessage ? (
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm font-bold text-booth-muted">
+            <span>총 {exhibitions.length.toLocaleString("ko-KR")}개 전시회</span>
+            {(query || venue !== "all" || region !== "all" || industry !== "all" || sort !== "dateAsc") ? (
+              <Link className="text-booth-blue underline-offset-4 hover:underline" href="/exhibitions">
+                필터 초기화
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
 
         {errorMessage ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-bold leading-7 text-red-700">

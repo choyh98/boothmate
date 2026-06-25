@@ -9,9 +9,9 @@ export type SignupInput = {
   role: SignupRole;
   email: string;
   password: string;
-  name: string;
-  phone: string;
-  companyName: string;
+  name?: string;
+  phone?: string;
+  companyName?: string;
   businessNumber?: string;
   industry?: string;
   website?: string;
@@ -38,8 +38,5 @@ export function validateSignup(input: SignupInput): string | null {
   }
   if (!validateEmail(input.email)) return "이메일 형식이 올바르지 않습니다.";
   if (!validatePassword(input.password)) return "비밀번호는 8자 이상이어야 합니다.";
-  if (!input.name.trim()) return "담당자 이름을 입력해주세요.";
-  if (!input.phone.trim()) return "연락처를 입력해주세요.";
-  if (!input.companyName.trim()) return "회사명을 입력해주세요.";
   return null;
 }

@@ -13,7 +13,8 @@ begin
   if not exists (select 1 from pg_type where typname = 'subscription_status') then
     create type public.subscription_status as enum ('inactive', 'active', 'past_due', 'cancelled');
   end if;
-end $$;
+end;
+$;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -67,7 +68,8 @@ begin
 
   alter table public.profiles alter column role set default 'company'::public.user_role;
   alter table public.profiles alter column role set not null;
-end $$;
+end;
+$;
 
 create table if not exists public.companies (
   id uuid primary key default gen_random_uuid(),
@@ -320,3 +322,4 @@ from public.contractors
 where verification_status = 'approved';
 
 grant select on public.contractor_public_profiles to anon, authenticated;
+

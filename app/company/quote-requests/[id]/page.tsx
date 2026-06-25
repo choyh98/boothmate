@@ -56,7 +56,7 @@ export default async function QuoteRequestDetailPage({ params }: { params: { id:
             <p className="mt-3 text-sm font-bold leading-7 text-booth-muted">
               {request.status === "draft"
                 ? "임시저장 상태입니다. 이어서 작성한 뒤 최종 제출할 수 있습니다."
-                : "제출 완료된 요청입니다. 받은 견적 기능은 다음 Phase에서 연결됩니다."}
+                : "제출 완료된 요청입니다. 받은 견적을 확인하고 비교할 수 있습니다."}
             </p>
             {request.status === "draft" ? (
               <form action={continueDraftAction} className="mt-5">
@@ -65,6 +65,11 @@ export default async function QuoteRequestDetailPage({ params }: { params: { id:
                   이어서 작성
                 </button>
               </form>
+            ) : null}
+            {request.status !== "draft" ? (
+              <Link className="mt-5 block rounded-xl bg-booth-blue px-5 py-4 text-center text-sm font-black text-white" href={`/company/quote-requests/${request.id}/quotes`}>
+                받은 견적 보기
+              </Link>
             ) : null}
             <Link className="mt-3 block rounded-xl border border-booth-line px-5 py-4 text-center text-sm font-black text-booth-ink" href="/company/quote-requests">
               목록으로

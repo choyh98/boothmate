@@ -2,7 +2,14 @@ export type UserRole = "company" | "contractor" | "admin";
 
 export type VerificationStatus = "pending" | "approved" | "rejected";
 
-export type SubscriptionStatus = "inactive" | "active" | "past_due" | "cancelled";
+export type SubscriptionStatus =
+  | "inactive"
+  | "active"
+  | "trial"
+  | "past_due"
+  | "expired"
+  | "suspended"
+  | "cancelled";
 
 export type QuoteRequestStatus =
   | "draft"
@@ -18,4 +25,5 @@ export type QuoteStatus =
   | "viewed"
   | "shortlisted"
   | "selected"
-  | "rejected";
+  | "rejected"
+  | "withdrawn";

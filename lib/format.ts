@@ -25,7 +25,12 @@ export function statusLabel(status: string) {
     reviewing: "검토중",
     selected: "업체 선택",
     closed: "마감",
-    cancelled: "취소"
+    cancelled: "취소",
+    submitted: "제출 완료",
+    viewed: "열람됨",
+    shortlisted: "후보 선정",
+    rejected: "미선정",
+    withdrawn: "철회"
   };
 
   return labels[status] ?? status;

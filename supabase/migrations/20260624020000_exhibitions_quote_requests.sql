@@ -10,7 +10,8 @@ begin
       'cancelled'
     );
   end if;
-end $$;
+end;
+$;
 
 create table if not exists public.exhibitions (
   id uuid primary key default gen_random_uuid(),
@@ -119,7 +120,8 @@ begin
 
   alter table public.quote_requests alter column status set default 'draft'::public.quote_request_status;
   alter table public.quote_requests alter column status set not null;
-end $$;
+end;
+$;
 
 create unique index if not exists exhibitions_source_id_idx
   on public.exhibitions(source_id)
@@ -207,3 +209,4 @@ create policy "quote_requests_admin_all"
   on public.quote_requests for all
   using (public.is_admin())
   with check (public.is_admin());
+

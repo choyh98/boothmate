@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { getCurrentContractor } from "@/lib/auth/get-current-user";
@@ -31,7 +32,15 @@ export default async function ContractorDashboardPage() {
             <InfoCard label="구독 상태" value={contractor?.subscription_status ?? "inactive"} />
           </div>
           <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm font-bold leading-7 text-blue-800">
-            견적 제출 기능은 다음 단계에서 구현됩니다.
+            공개 요청을 확인하고 견적을 임시저장하거나 최종 제출할 수 있습니다.
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link className="rounded-xl bg-booth-blue px-5 py-3 text-sm font-black text-white shadow-sm" href="/contractor/quote-requests">
+              공개 요청 보기
+            </Link>
+            <Link className="rounded-xl border border-booth-line bg-white px-5 py-3 text-sm font-black text-booth-ink shadow-sm" href="/contractor/quotes">
+              제출한 견적
+            </Link>
           </div>
         </section>
       </main>

@@ -26,10 +26,10 @@ export async function middleware(request: NextRequest) {
     }
 
     if (requiredRole && requiredRole !== safeDevRole) {
-      const dashboardUrl = request.nextUrl.clone();
-      dashboardUrl.pathname = getDashboardPath(safeDevRole);
-      dashboardUrl.search = "";
-      return NextResponse.redirect(dashboardUrl);
+      const deniedUrl = request.nextUrl.clone();
+      deniedUrl.pathname = "/access-denied";
+      deniedUrl.search = "";
+      return NextResponse.redirect(deniedUrl);
     }
 
     return response;
@@ -84,10 +84,10 @@ export async function middleware(request: NextRequest) {
     }
 
     if (role !== requiredRole) {
-      const dashboardUrl = request.nextUrl.clone();
-      dashboardUrl.pathname = getDashboardPath(role);
-      dashboardUrl.search = "";
-      return NextResponse.redirect(dashboardUrl);
+      const deniedUrl = request.nextUrl.clone();
+      deniedUrl.pathname = "/access-denied";
+      deniedUrl.search = "";
+      return NextResponse.redirect(deniedUrl);
     }
   }
 

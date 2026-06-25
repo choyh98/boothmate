@@ -21,7 +21,7 @@ export async function listMyQuoteRequests(ownerId: string) {
     .select(`
       id,company_id,exhibition_id,title,booth_count,booth_width,booth_depth,booth_area,open_sides,
       booth_types,budget_min,budget_max,vat_included,required_items,design_styles,requirements,
-      deadline,status,selected_quote_id,created_at,updated_at,
+      deadline,status,selected_quote_id,selected_at,created_at,updated_at,
       exhibitions(id,title,venue,venue_group,start_date,end_date,industry)
     `)
     .eq("company_id", company.id)
@@ -39,7 +39,7 @@ export async function getMyQuoteRequest(ownerId: string, id: string) {
     .select(`
       id,company_id,exhibition_id,title,booth_count,booth_width,booth_depth,booth_area,open_sides,
       booth_types,budget_min,budget_max,vat_included,required_items,design_styles,requirements,
-      deadline,status,selected_quote_id,created_at,updated_at,
+      deadline,status,selected_quote_id,selected_at,created_at,updated_at,
       exhibitions(id,title,venue,venue_group,start_date,end_date,industry)
     `)
     .eq("company_id", company.id)
