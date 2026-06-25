@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { saveQuoteRequestAction } from "@/app/company/quote-requests/actions";
 import { emptyQuoteRequestForm } from "@/lib/quote-requests/validation";
@@ -39,18 +39,31 @@ function requestToForm(request: QuoteRequest): QuoteRequestFormData {
     deadlineHours: "48"
   };
 }
+function initialFormFromExhibition(exhibitions: Exhibition[], exhibitionId?: string) {
+  const form = emptyQuoteRequestForm(exhibitionId ?? "");
+  if (!exhibitionId) return form;
 
+  const exhibition = exhibitions.find((item) => item.id === exhibitionId);
+  return {
+    ...form,
+    title: exhibition ? `${exhibition.title} 부스 견적 요청` : form.title
+  };
+}
 export function QuoteRequestWizard({
   exhibitions,
   initialRequest,
   initialExhibitionId
 }: WizardProps) {
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const storageKey = useMemo(
+    () => `boothmate:quote-request:${initialRequest?.id ?? initialExhibitionId ?? "new"}`,
+    [initialExhibitionId, initialRequest?.id]
+  );
+  const [step, setStep] = useState(() => (initialExhibitionId && !initialRequest ? 1 : 0));
   const [form, setForm] = useState<QuoteRequestFormData>(
     initialRequest
       ? requestToForm(initialRequest)
-      : emptyQuoteRequestForm(initialExhibitionId ?? "")
+      : initialFormFromExhibition(exhibitions, initialExhibitionId)
   );
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -59,6 +72,23 @@ export function QuoteRequestWizard({
     () => exhibitions.find((item) => item.id === form.exhibitionId),
     [exhibitions, form.exhibitionId]
   );
+
+  useEffect(() => {
+    if (initialRequest) return;
+    const saved = window.localStorage.getItem(storageKey);
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as QuoteRequestFormData;
+      setForm(parsed);
+      setMessage("브라우저에 임시 보관된 작성 내용을 불러왔습니다.");
+    } catch {
+      window.localStorage.removeItem(storageKey);
+    }
+  }, [initialRequest, storageKey]);
+
+  useEffect(() => {
+    window.localStorage.setItem(storageKey, JSON.stringify(form));
+  }, [form, storageKey]);
 
   function patch(patchValue: Partial<QuoteRequestFormData>) {
     setForm((current) => ({ ...current, ...patchValue }));
@@ -98,6 +128,7 @@ export function QuoteRequestWizard({
         window.history.replaceState(null, "", `/company/quote-requests/new?draftId=${result.id}`);
       }
       if (intent === "submit" && result.id) {
+        window.localStorage.removeItem(storageKey);
         router.push(`/company/quote-requests/${result.id}`);
       }
     });
@@ -332,3 +363,4 @@ function SummaryList({ form, exhibitionTitle, compact = false }: { form: QuoteRe
     </dl>
   );
 }
+

@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseEnv } from "@/lib/config/env";
-import { getDashboardPath, isUserRole } from "@/lib/auth/routes";
+import { getDashboardPath, getRequiredRoleFromPath, isUserRole } from "@/lib/auth/routes";
 import { validateLogin, validateSignup } from "@/lib/validations/auth";
 import type { AuthFormState, SignupRole, UserRole } from "@/types/auth";
 
@@ -23,12 +23,21 @@ function isDevAuthEnabled() {
   return process.env.NODE_ENV !== "production";
 }
 
+function safeRedirectPathForRole(nextPath: string, role: UserRole) {
+  if (!nextPath.startsWith("/") || nextPath.startsWith("//")) return null;
+  const requiredRole = getRequiredRoleFromPath(nextPath);
+  if (requiredRole && requiredRole !== role) return null;
+  if (nextPath.startsWith("/login") || nextPath.startsWith("/signup")) return null;
+  return nextPath;
+}
+
 export async function loginAction(
   _prevState: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
   const email = readString(formData, "email");
   const password = readString(formData, "password");
+  const nextPath = readString(formData, "next");
   const validationError = validateLogin({ email, password });
 
   if (validationError) {
@@ -66,7 +75,7 @@ export async function loginAction(
       };
     }
 
-    redirectTo = getDashboardPath(profile.role);
+    redirectTo = safeRedirectPathForRole(nextPath, profile.role) ?? getDashboardPath(profile.role);
   } catch (error) {
     return {
       ok: false,
@@ -176,6 +185,7 @@ export async function devLoginAction(formData: FormData) {
   }
 
   const role = readString(formData, "role") as UserRole;
+  const nextPath = readString(formData, "next");
   if (!isUserRole(role)) {
     redirect("/login");
   }
@@ -187,5 +197,5 @@ export async function devLoginAction(formData: FormData) {
     maxAge: 60 * 60 * 8
   });
 
-  redirect(getDashboardPath(role));
+  redirect(safeRedirectPathForRole(nextPath, role) ?? getDashboardPath(role));
 }

@@ -22,14 +22,24 @@ function emptyToNull(value: string) {
   return value || null;
 }
 
+const exhibitionStatuses = ["active", "inactive", "cancelled"];
+const verificationStatuses = ["pending", "approved", "rejected"];
+const subscriptionStatuses = ["trial", "active", "inactive", "expired", "suspended", "cancelled"];
+
+function isAllowed(value: string, allowed: string[]) {
+  return allowed.includes(value);
+}
+
 export async function createExhibitionAction(formData: FormData) {
   await requireAdminAction();
   const supabase = createSupabaseServerClient();
   const title = readString(formData, "title");
   const venue = readString(formData, "venue");
   const startDate = readString(formData, "start_date");
+  const status = readString(formData, "status") || "active";
 
   if (!title) redirect("/admin/exhibitions?error=title");
+  if (!isAllowed(status, exhibitionStatuses)) redirect("/admin/exhibitions?error=status");
 
   let duplicateQuery = supabase
     .from("exhibitions")
@@ -57,7 +67,7 @@ export async function createExhibitionAction(formData: FormData) {
     homepage_url: emptyToNull(readString(formData, "homepage_url")),
     source: emptyToNull(readString(formData, "source")),
     last_checked_at: emptyToNull(readString(formData, "last_checked_at")),
-    status: readString(formData, "status") || "active"
+    status
   });
 
   if (error) redirect("/admin/exhibitions?error=save");
@@ -70,7 +80,9 @@ export async function updateExhibitionAction(formData: FormData) {
   const supabase = createSupabaseServerClient();
   const id = readString(formData, "id");
   const title = readString(formData, "title");
+  const status = readString(formData, "status") || "active";
   if (!id || !title) redirect("/admin/exhibitions?error=title");
+  if (!isAllowed(status, exhibitionStatuses)) redirect("/admin/exhibitions?error=status");
 
   const { error } = await supabase
     .from("exhibitions")
@@ -86,7 +98,7 @@ export async function updateExhibitionAction(formData: FormData) {
       homepage_url: emptyToNull(readString(formData, "homepage_url")),
       source: emptyToNull(readString(formData, "source")),
       last_checked_at: emptyToNull(readString(formData, "last_checked_at")),
-      status: readString(formData, "status") || "active"
+      status
     })
     .eq("id", id);
 
@@ -102,6 +114,9 @@ export async function updateContractorStatusAction(formData: FormData) {
   const verificationStatus = readString(formData, "verification_status");
   const subscriptionStatus = readString(formData, "subscription_status");
   if (!id) redirect("/admin/contractors?error=missing");
+  if (!isAllowed(verificationStatus, verificationStatuses) || !isAllowed(subscriptionStatus, subscriptionStatuses)) {
+    redirect(`/admin/contractors?contractorId=${id}&error=status`);
+  }
 
   const { error } = await supabase
     .from("contractors")

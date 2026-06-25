@@ -1,5 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { NextResponse } from "next/server";
+import { getCurrentUserContext } from "@/lib/auth/get-current-user";
+import { getDashboardPath } from "@/lib/auth/routes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -51,7 +54,13 @@ function rewriteLegacyHtml(html: string) {
   return rewritten;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const context = await getCurrentUserContext().catch(() => null);
+
+  if (context) {
+    return NextResponse.redirect(new URL(getDashboardPath(context.profile.role), request.url));
+  }
+
   const htmlPath = path.join(process.cwd(), "legacy-static", "index.html");
   const html = await readFile(htmlPath, "utf8");
 

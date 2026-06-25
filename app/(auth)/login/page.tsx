@@ -1,4 +1,4 @@
-import { AppShell } from "@/components/app-shell";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthCard } from "@/components/auth/auth-card";
 import { DevLoginPanel } from "@/components/auth/dev-login-panel";
 import { LoginForm } from "@/components/auth/login-form";
@@ -8,6 +8,7 @@ import { redirectSignedInUser } from "@/lib/auth/require-role";
 type LoginPageProps = {
   searchParams?: {
     error?: string;
+    next?: string;
   };
 };
 
@@ -29,7 +30,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <AppShell>
+    <AuthShell>
       <AuthCard
         eyebrow="Login"
         title="부스메이트 로그인"
@@ -37,10 +38,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       >
         <LoginForm
           configReady={envStatus.hasUrl && envStatus.hasAnonKey}
+          nextPath={searchParams?.next}
           pageMessage={pageMessage(searchParams?.error)}
         />
-        <DevLoginPanel />
+        <DevLoginPanel nextPath={searchParams?.next} />
       </AuthCard>
-    </AppShell>
+    </AuthShell>
   );
 }

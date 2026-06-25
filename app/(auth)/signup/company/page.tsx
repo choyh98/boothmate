@@ -1,4 +1,4 @@
-import { AppShell } from "@/components/app-shell";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthCard } from "@/components/auth/auth-card";
 import { SignupForm } from "@/components/auth/signup-form";
 import { getPublicEnvStatus } from "@/lib/config/env";
@@ -12,7 +12,7 @@ export default async function CompanySignupPage() {
   }
 
   return (
-    <AppShell>
+    <AuthShell>
       <AuthCard
         eyebrow="Company Signup"
         title="참여기업 회원가입"
@@ -20,6 +20,6 @@ export default async function CompanySignupPage() {
       >
         <SignupForm configReady={envStatus.hasUrl && envStatus.hasAnonKey} role="company" />
       </AuthCard>
-    </AppShell>
+    </AuthShell>
   );
 }

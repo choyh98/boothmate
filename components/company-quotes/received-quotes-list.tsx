@@ -14,15 +14,20 @@ type ReceivedQuotesListProps = {
 export function ReceivedQuotesList({ quoteRequestId, quotes }: ReceivedQuotesListProps) {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [limitMessage, setLimitMessage] = useState("");
   const selectedCount = selectedIds.length;
   const canCompare = selectedCount > 0 && selectedCount <= 4;
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   function toggle(id: string) {
+    setLimitMessage("");
     setSelectedIds((current) => {
       if (current.includes(id)) return current.filter((item) => item !== id);
-      if (current.length >= 4) return current;
+      if (current.length >= 4) {
+        setLimitMessage("견적 비교는 최대 4개까지 선택할 수 있습니다.");
+        return current;
+      }
       return [...current, id];
     });
   }
@@ -35,12 +40,16 @@ export function ReceivedQuotesList({ quoteRequestId, quotes }: ReceivedQuotesLis
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/80 bg-white p-4 shadow-sm">
-        <p className="text-sm font-black text-booth-muted">
-          비교 대상 {selectedCount}/4
-        </p>
+        <div>
+          <p className="text-sm font-black text-booth-muted">
+            비교 대상 {selectedCount}/4
+          </p>
+          {limitMessage ? <p className="mt-1 text-xs font-bold text-amber-700">{limitMessage}</p> : null}
+        </div>
         <button
           className="rounded-xl bg-booth-blue px-5 py-3 text-sm font-black text-white disabled:opacity-60"
           disabled={!canCompare}
+          title={!canCompare ? "비교할 견적을 1개 이상 선택해주세요." : undefined}
           onClick={compare}
           type="button"
         >
@@ -57,7 +66,12 @@ export function ReceivedQuotesList({ quoteRequestId, quotes }: ReceivedQuotesLis
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <label className="inline-flex items-center gap-2 rounded-xl border border-booth-line bg-slate-50 px-3 py-2 text-sm font-black text-booth-ink">
-                      <input checked={checked} onChange={() => toggle(quote.id)} type="checkbox" />
+                      <input
+                        aria-label={`${profile?.company_name ?? "공개 프로필 미승인 업체"} 견적 비교 선택`}
+                        checked={checked}
+                        onChange={() => toggle(quote.id)}
+                        type="checkbox"
+                      />
                       비교
                     </label>
                     <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-booth-blue">

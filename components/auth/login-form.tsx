@@ -8,14 +8,16 @@ import { initialAuthState } from "@/lib/auth/form-state";
 
 type LoginFormProps = {
   configReady: boolean;
+  nextPath?: string;
   pageMessage?: string;
 };
 
-export function LoginForm({ configReady, pageMessage }: LoginFormProps) {
+export function LoginForm({ configReady, nextPath, pageMessage }: LoginFormProps) {
   const [state, formAction] = useFormState(loginAction, initialAuthState);
 
   return (
     <form action={formAction} className="grid gap-4">
+      {nextPath ? <input name="next" type="hidden" value={nextPath} /> : null}
       {pageMessage ? (
         <div className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold leading-6 text-blue-800">
           {pageMessage}

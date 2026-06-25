@@ -47,7 +47,10 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
     [form]
   );
   const previewTotal = numeric(form.totalPrice) || costTotal;
+  const totalPriceValue = numeric(form.totalPrice);
+  const hasCostMismatch = totalPriceValue > 0 && costTotal > 0 && totalPriceValue !== costTotal;
   const isSubmitted = initialQuote?.status && initialQuote.status !== "draft";
+  const canSubmitWithSubscription = contractor.subscription_status === "active" || contractor.subscription_status === "trial";
 
   function patch(patchValue: Partial<QuoteFormData>) {
     setForm((current) => ({ ...current, ...patchValue }));
@@ -87,6 +90,11 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
             {error}
           </div>
         ) : null}
+        {!canSubmitWithSubscription ? (
+          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold leading-6 text-amber-800">
+            현재 구독 상태는 {contractor.subscription_status}입니다. 임시저장은 가능하지만 최종 제출은 active 또는 trial 상태에서만 가능합니다.
+          </div>
+        ) : null}
 
         <div className="grid gap-5">
           <div className="grid gap-4 md:grid-cols-2">
@@ -97,6 +105,18 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
               부가세 포함
             </label>
           </div>
+          {hasCostMismatch ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-6 text-amber-800">
+              총 견적 금액과 상세 비용 합계가 다릅니다. 총액 {formatCurrency(totalPriceValue)}, 상세 합계 {formatCurrency(costTotal)}입니다.
+              <button
+                className="ml-2 font-black text-booth-blue underline underline-offset-4"
+                onClick={() => patch({ totalPrice: String(costTotal) })}
+                type="button"
+              >
+                상세 합계로 맞추기
+              </button>
+            </div>
+          ) : null}
 
           <div>
             <h2 className="text-lg font-black text-booth-ink">상세 비용</h2>
@@ -136,9 +156,10 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
           </button>
           <button
             className="rounded-xl bg-booth-blue px-5 py-3 text-sm font-black text-white disabled:opacity-60"
-            disabled={isPending || Boolean(isSubmitted)}
+            disabled={isPending || Boolean(isSubmitted) || !canSubmitWithSubscription}
             onClick={() => save("submit")}
             type="button"
+            title={!canSubmitWithSubscription ? "active 또는 trial 구독 상태에서만 제출할 수 있습니다." : undefined}
           >
             {isPending ? "제출 중..." : "최종 제출"}
           </button>
@@ -169,6 +190,7 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
           <dl className="mt-5 grid gap-3">
             <PreviewRow label="부스 유형" value={form.boothType || "입력 전"} />
             <PreviewRow label="상세 비용 합계" value={formatCurrency(costTotal)} />
+            {hasCostMismatch ? <PreviewRow label="총액 차이" value={formatCurrency(totalPriceValue - costTotal)} /> : null}
             <PreviewRow label="1차 디자인" value={form.firstDesignDate || "미정"} />
             <PreviewRow label="제작 기간" value={form.productionDays ? `${form.productionDays}일` : "미정"} />
             <PreviewRow label="유효기간" value={form.validUntil || "미정"} />

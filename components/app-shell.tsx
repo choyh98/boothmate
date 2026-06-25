@@ -11,6 +11,7 @@ type AppShellProps = {
 
 export async function AppShell({ children }: AppShellProps) {
   let dashboardPath = "/login";
+  let logoHref = "/";
   let accountLabel = "로그인";
   let userLabel = "";
   let roleLabel = "";
@@ -20,6 +21,7 @@ export async function AppShell({ children }: AppShellProps) {
     const context = await getCurrentUserContext();
     if (context) {
       dashboardPath = getDashboardPath(context.profile.role);
+      logoHref = dashboardPath;
       accountLabel = "대시보드";
       userLabel = context.profile.name ?? context.email ?? "사용자";
       roleLabel = context.profile.role;
@@ -32,9 +34,10 @@ export async function AppShell({ children }: AppShellProps) {
   const navItems =
     role === "company"
       ? [
-          ["대시보드", "/company/dashboard"],
-          ["새 견적 요청", "/company/quote-requests/new"],
-          ["내 견적 요청", "/company/quote-requests"]
+          ["전시일정", "/exhibitions"],
+          ["견적요청", "/company/quote-requests/new"],
+          ["전시업체 찾기", "/company/contractors"],
+          ["이용방법", "/company/guide"]
         ]
       : role === "contractor"
         ? [
@@ -54,16 +57,16 @@ export async function AppShell({ children }: AppShellProps) {
           : [];
 
   return (
-    <div className="min-h-screen">
-      <header className="site-header sticky top-0 z-20 border-b border-white/70 bg-white/80 backdrop-blur">
-        <div className="site-header-inner mx-auto flex min-h-[88px] max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 md:px-8">
-          <Link className="flex items-center" href="/">
+    <div className="min-h-screen pt-[106px]">
+      <header className="site-header fixed left-1/2 top-[18px] z-20 w-[min(1120px,calc(100%-36px))] -translate-x-1/2 rounded-[24px] border border-slate-900/10 bg-white/90 px-3 py-2 shadow-soft backdrop-blur-xl">
+        <div className="site-header-inner flex min-h-[58px] flex-wrap items-center justify-between gap-4">
+          <Link className="flex items-center" href={logoHref}>
             <Image src="/logo.svg" alt="부스메이트" width={136} height={42} priority />
           </Link>
           {navItems.length ? (
-            <nav className="flex flex-wrap items-center gap-2">
+            <nav className="flex flex-wrap items-center gap-3 md:gap-7">
               {navItems.map(([label, href]) => (
-                <Link className="rounded-xl px-3 py-2 text-sm font-black text-booth-muted transition hover:bg-blue-50 hover:text-booth-blue" href={href} key={href}>
+                <Link className="text-sm font-black text-slate-700 transition hover:-translate-y-0.5 hover:text-booth-blue" href={href} key={href}>
                   {label}
                 </Link>
               ))}
@@ -71,15 +74,16 @@ export async function AppShell({ children }: AppShellProps) {
           ) : null}
           {role ? (
             <div className="flex flex-wrap items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm font-black text-booth-ink">{userLabel}</p>
-                <p className="text-xs font-bold text-booth-muted">{roleLabel}</p>
+              <div className="hidden text-right md:block">
+                <p className="max-w-[180px] truncate text-sm font-black text-booth-ink">{userLabel}</p>
+                <p className="text-xs font-black uppercase text-booth-muted">{roleLabel}</p>
               </div>
               <Link
                 className="header-login rounded-xl border border-booth-line bg-white px-4 py-3 text-sm font-black text-booth-ink shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200"
                 href={dashboardPath}
+                title={`${userLabel} · ${roleLabel}`}
               >
-                {accountLabel}
+                내정보
               </Link>
               <LogoutButton />
             </div>

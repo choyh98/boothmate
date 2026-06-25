@@ -11,6 +11,7 @@ const authPaths = ["/login", "/signup"];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const requiredRole = getRequiredRoleFromPath(pathname);
+  const isRootPath = pathname === "/";
   const isAuthPath = authPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
   const { supabase, response } = createSupabaseMiddlewareClient(request);
   const devRole = request.cookies.get("boothmate_dev_role")?.value;
@@ -18,7 +19,7 @@ export async function middleware(request: NextRequest) {
     process.env.NODE_ENV !== "production" && isUserRole(devRole) ? devRole : null;
 
   if (safeDevRole) {
-    if (isAuthPath) {
+    if (isAuthPath || isRootPath) {
       const dashboardUrl = request.nextUrl.clone();
       dashboardUrl.pathname = getDashboardPath(safeDevRole);
       dashboardUrl.search = "";
@@ -68,7 +69,7 @@ export async function middleware(request: NextRequest) {
 
   const role = isUserRole(profile?.role) ? profile.role : null;
 
-  if (isAuthPath && role) {
+  if ((isAuthPath || isRootPath) && role) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = getDashboardPath(role);
     dashboardUrl.search = "";
@@ -95,5 +96,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/signup/:path*", "/company/:path*", "/contractor/:path*", "/admin/:path*"]
+  matcher: ["/", "/login", "/signup/:path*", "/company/:path*", "/contractor/:path*", "/admin/:path*"]
 };

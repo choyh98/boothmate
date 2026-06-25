@@ -19,7 +19,7 @@ const devRoles: Array<{ role: UserRole; label: string; description: string }> = 
   }
 ];
 
-export function DevLoginPanel() {
+export function DevLoginPanel({ nextPath }: { nextPath?: string }) {
   if (process.env.NODE_ENV === "production") return null;
 
   return (
@@ -32,6 +32,7 @@ export function DevLoginPanel() {
         {devRoles.map((item) => (
           <form action={devLoginAction} key={item.role}>
             <input name="role" type="hidden" value={item.role} />
+            {nextPath ? <input name="next" type="hidden" value={nextPath} /> : null}
             <button
               className="flex w-full items-center justify-between rounded-xl border border-blue-100 bg-white px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-booth-blue"
               type="submit"

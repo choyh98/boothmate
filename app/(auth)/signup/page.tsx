@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AppShell } from "@/components/app-shell";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthCard } from "@/components/auth/auth-card";
 import { getPublicEnvStatus } from "@/lib/config/env";
 import { redirectSignedInUser } from "@/lib/auth/require-role";
@@ -12,7 +12,7 @@ export default async function SignupPage() {
   }
 
   return (
-    <AppShell>
+    <AuthShell>
       <AuthCard
         eyebrow="Signup"
         title="회원 유형을 선택해주세요."
@@ -46,6 +46,6 @@ export default async function SignupPage() {
           </Link>
         </div>
       </AuthCard>
-    </AppShell>
+    </AuthShell>
   );
 }
