@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { SelectQuoteButton } from "@/components/company-quotes/select-quote-button";
+import { StatusBadge } from "@/components/ui/state";
 import { markQuoteViewedAction } from "@/app/company/quotes/actions";
-import { formatCurrency, formatDateRange, statusLabel } from "@/lib/format";
+import { formatCurrency, formatDateRange } from "@/lib/format";
 import { requireRole } from "@/lib/auth/require-role";
 import { getCompanyQuote } from "@/lib/company-quotes/queries";
 
@@ -50,9 +51,7 @@ export default async function CompanyQuoteDetailPage({ params }: { params: { id:
         </div>
         <section className="grid gap-6 lg:grid-cols-[1fr_340px]">
           <div className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft">
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-booth-blue">
-              {statusLabel(quote.status)}
-            </span>
+            <StatusBadge status={quote.status} />
             <h1 className="mt-5 text-3xl font-black text-booth-ink">
               {profile?.company_name ?? "공개 프로필 미승인 업체"}
             </h1>

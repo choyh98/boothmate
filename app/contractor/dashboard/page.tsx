@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, StatusBadge } from "@/components/ui/state";
 import { getCurrentContractor } from "@/lib/auth/get-current-user";
 import { requireRole } from "@/lib/auth/require-role";
-import { formatCurrency, formatDateRange, statusLabel } from "@/lib/format";
+import { formatCurrency, formatDateRange } from "@/lib/format";
 import { canSubmitQuote, listMySubmittedQuotes, listOpenQuoteRequests } from "@/lib/quotes/queries";
 import type { Quote } from "@/types/quote";
 import type { QuoteRequest } from "@/types/quote-request";
@@ -43,9 +43,7 @@ export default async function ContractorDashboardPage() {
       <main className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8">
         <section className="grid gap-6 lg:grid-cols-[1fr_380px]">
           <div className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft md:p-8">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">
-              Contractor Workspace
-            </p>
+            <p className="text-sm font-black text-booth-blue">전시업체 워크스페이스</p>
             <h1 className="mt-4 text-4xl font-black leading-tight text-booth-ink md:text-5xl">
               {contractor?.company_name ?? context.profile.name ?? "전시업체"}님의 견적 영업 현황
             </h1>
@@ -63,7 +61,7 @@ export default async function ContractorDashboardPage() {
           </div>
 
           <aside className="rounded-[28px] border border-slate-900/10 bg-slate-950 p-6 text-white shadow-soft">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-300">Account</p>
+            <p className="text-sm font-black text-blue-300">업체 계정 상태</p>
             <h2 className="mt-4 text-2xl font-black">업체 상태</h2>
             <div className="mt-6 grid gap-3">
               <StatusRow label="인증 상태" value={contractor?.verification_status ?? "pending"} />
@@ -137,7 +135,7 @@ export default async function ContractorDashboardPage() {
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <StatusBadge status={statusLabel(quote.status)} />
+                        <StatusBadge status={quote.status} />
                         <h3 className="mt-3 text-lg font-black text-booth-ink">
                           {quote.quote_requests?.title ?? "견적 요청 정보 없음"}
                         </h3>

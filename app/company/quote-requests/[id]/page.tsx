@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { StatusBadge } from "@/components/ui/state";
 import { continueDraftAction } from "@/app/company/quote-requests/actions";
-import { formatCurrency, formatDateRange, statusLabel } from "@/lib/format";
+import { formatCurrency, formatDateRange } from "@/lib/format";
 import { getMyQuoteRequest } from "@/lib/quote-requests/queries";
 import { requireRole } from "@/lib/auth/require-role";
 
@@ -29,9 +30,7 @@ export default async function QuoteRequestDetailPage({ params }: { params: { id:
         </div>
         <section className="grid gap-6 lg:grid-cols-[1fr_340px]">
           <div className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft">
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-booth-blue">
-              {statusLabel(request.status)}
-            </span>
+            <StatusBadge status={request.status} />
             <h1 className="mt-5 text-3xl font-black text-booth-ink">{request.title}</h1>
             <p className="mt-3 text-sm font-bold text-booth-muted">
               {request.exhibitions?.title ?? "전시회 정보 없음"} · {formatDateRange(request.exhibitions?.start_date, request.exhibitions?.end_date)}

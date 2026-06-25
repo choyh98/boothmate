@@ -38,9 +38,7 @@ export default async function CompanyGuidePage() {
     <AppShell>
       <main className="mx-auto w-full max-w-6xl px-5 py-10 md:px-8">
         <section className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft md:p-8">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">
-            Guide
-          </p>
+          <p className="text-sm font-black text-booth-blue">이용방법</p>
           <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_360px]">
             <div>
               <h1 className="text-4xl font-black leading-tight text-booth-ink">

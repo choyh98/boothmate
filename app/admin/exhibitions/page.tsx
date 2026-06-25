@@ -3,6 +3,7 @@ import { EmptyState, ErrorState, StatusBadge } from "@/components/ui/state";
 import { createExhibitionAction, updateExhibitionAction } from "@/app/admin/actions";
 import { listAdminExhibitions } from "@/lib/admin/queries";
 import { requireRole } from "@/lib/auth/require-role";
+import { statusLabel } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export default async function AdminExhibitionsPage({ searchParams }: PageProps) 
           <input className="rounded-xl border border-booth-line bg-white px-4 py-3 text-sm font-bold" name="q" placeholder="전시회 검색" defaultValue={searchParams?.q ?? ""} />
           <select className="rounded-xl border border-booth-line bg-white px-4 py-3 text-sm font-bold" name="status" defaultValue={searchParams?.status ?? "all"}>
             <option value="all">전체 상태</option>
-            {exhibitionStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
+            {exhibitionStatuses.map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}
           </select>
           <button className="rounded-xl bg-booth-blue px-5 py-3 text-sm font-black text-white" type="submit">필터</button>
         </form>
@@ -81,7 +82,7 @@ function ExhibitionForm({ action, exhibition }: { action: (formData: FormData) =
       <label className="grid gap-2 text-sm font-black text-booth-ink">
         상태
         <select className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold" name="status" defaultValue={exhibition?.status ?? "active"}>
-          {exhibitionStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
+          {exhibitionStatuses.map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}
         </select>
       </label>
       <div className="flex items-end">
@@ -103,7 +104,7 @@ function Input({ label, ...props }: React.InputHTMLAttributes<HTMLInputElement> 
 function PageHeader({ title, description }: { title: string; description: string }) {
   return (
     <div className="mb-8">
-      <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">Admin</p>
+      <p className="text-sm font-black text-booth-blue">관리자</p>
       <h1 className="mt-3 text-4xl font-black text-booth-ink">{title}</h1>
       <p className="mt-3 text-base font-semibold text-booth-muted">{description}</p>
     </div>

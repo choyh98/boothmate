@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { formatCurrency, formatDateRange, statusLabel } from "@/lib/format";
+import { StatusBadge } from "@/components/ui/state";
+import { formatCurrency, formatDateRange } from "@/lib/format";
 import { requireRole } from "@/lib/auth/require-role";
 import { listMySubmittedQuotes } from "@/lib/quotes/queries";
 import type { Quote } from "@/types/quote";
@@ -23,7 +24,7 @@ export default async function ContractorQuotesPage() {
       <main className="mx-auto w-full max-w-6xl px-5 py-10 md:px-8">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">Submitted Quotes</p>
+            <p className="text-sm font-black text-booth-blue">제출 견적 관리</p>
             <h1 className="mt-3 text-4xl font-black text-booth-ink">제출한 견적</h1>
             <p className="mt-3 text-base font-semibold text-booth-muted">
               최종 제출한 견적과 진행 상태를 확인합니다.
@@ -58,9 +59,7 @@ export default async function ContractorQuotesPage() {
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-booth-blue">
-                    {statusLabel(quote.status)}
-                  </span>
+                  <StatusBadge status={quote.status} />
                   <h2 className="mt-3 text-xl font-black text-booth-ink">
                     {quote.quote_requests?.title ?? "견적 요청 정보 없음"}
                   </h2>

@@ -75,7 +75,7 @@ function relationOne<T>(value: T | T[] | null | undefined) {
 function PageHeader({ title, description }: { title: string; description: string }) {
   return (
     <div className="mb-8">
-      <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">Admin</p>
+      <p className="text-sm font-black text-booth-blue">관리자</p>
       <h1 className="mt-3 text-4xl font-black text-booth-ink">{title}</h1>
       <p className="mt-3 text-base font-semibold text-booth-muted">{description}</p>
     </div>

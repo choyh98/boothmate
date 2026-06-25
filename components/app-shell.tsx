@@ -64,13 +64,27 @@ export async function AppShell({ children }: AppShellProps) {
             <Image src="/logo.svg" alt="부스메이트" width={136} height={42} priority />
           </Link>
           {navItems.length ? (
-            <nav className="flex flex-wrap items-center gap-3 md:gap-7">
+            <nav className="hidden flex-wrap items-center gap-3 lg:flex lg:gap-7">
               {navItems.map(([label, href]) => (
                 <Link className="text-sm font-black text-slate-700 transition hover:-translate-y-0.5 hover:text-booth-blue" href={href} key={href}>
                   {label}
                 </Link>
               ))}
             </nav>
+          ) : null}
+          {navItems.length ? (
+            <details className="relative lg:hidden">
+              <summary className="list-none rounded-xl border border-booth-line bg-white px-4 py-3 text-sm font-black text-booth-ink shadow-sm">
+                메뉴
+              </summary>
+              <div className="absolute right-0 top-14 z-30 grid min-w-48 gap-1 rounded-2xl border border-booth-line bg-white p-2 shadow-soft">
+                {navItems.map(([label, href]) => (
+                  <Link className="rounded-xl px-4 py-3 text-sm font-black text-booth-ink hover:bg-blue-50 hover:text-booth-blue" href={href} key={href}>
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </details>
           ) : null}
           {role ? (
             <div className="flex flex-wrap items-center gap-3">

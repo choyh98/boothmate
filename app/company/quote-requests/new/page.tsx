@@ -34,9 +34,7 @@ export default async function NewQuoteRequestPage({ searchParams }: NewQuoteRequ
     <AppShell>
       <main className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8">
         <div className="mb-8">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">
-            Quote Request
-          </p>
+          <p className="text-sm font-black text-booth-blue">견적 요청 작성</p>
           <h1 className="mt-3 text-4xl font-black text-booth-ink">전시부스 견적 요청</h1>
           <p className="mt-3 text-base font-semibold text-booth-muted">
             작성 내용은 임시저장하면 Supabase에 draft 상태로 보관됩니다.

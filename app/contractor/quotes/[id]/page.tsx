@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
-import { formatCurrency, formatDateRange, statusLabel } from "@/lib/format";
+import { StatusBadge } from "@/components/ui/state";
+import { formatCurrency, formatDateRange } from "@/lib/format";
 import { requireRole } from "@/lib/auth/require-role";
 import { getMyQuote } from "@/lib/quotes/queries";
 
@@ -31,9 +32,7 @@ export default async function ContractorQuoteDetailPage({ params }: { params: { 
         </div>
         <section className="grid gap-6 lg:grid-cols-[1fr_340px]">
           <div className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft">
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-booth-blue">
-              {statusLabel(quote.status)}
-            </span>
+            <StatusBadge status={quote.status} />
             <h1 className="mt-5 text-3xl font-black text-booth-ink">
               {request?.title ?? "견적 요청 정보 없음"}
             </h1>

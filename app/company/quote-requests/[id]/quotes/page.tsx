@@ -34,7 +34,7 @@ export default async function CompanyReceivedQuotesPage({ params }: { params: { 
         </div>
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">Received Quotes</p>
+            <p className="text-sm font-black text-booth-blue">받은 견적 관리</p>
             <h1 className="mt-3 text-4xl font-black text-booth-ink">받은 견적</h1>
             <p className="mt-3 text-base font-semibold text-booth-muted">
               {request.title} · {request.exhibitions?.title ?? "전시회 정보 없음"} · {formatDateRange(request.exhibitions?.start_date, request.exhibitions?.end_date)}

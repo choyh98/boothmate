@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, StatusBadge } from "@/components/ui/state";
 import { getCurrentCompany } from "@/lib/auth/get-current-user";
 import { requireRole } from "@/lib/auth/require-role";
-import { formatCurrency, formatDate, formatDateRange, statusLabel } from "@/lib/format";
+import { formatCurrency, formatDate, formatDateRange } from "@/lib/format";
 import { listMyQuoteRequests } from "@/lib/quote-requests/queries";
 import type { QuoteRequest } from "@/types/quote-request";
 
@@ -39,9 +39,7 @@ export default async function CompanyDashboardPage() {
       <main className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8">
         <section className="grid gap-6 lg:grid-cols-[1fr_380px]">
           <div className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft md:p-8">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">
-              Company Workspace
-            </p>
+            <p className="text-sm font-black text-booth-blue">참여기업 워크스페이스</p>
             <h1 className="mt-4 text-4xl font-black leading-tight text-booth-ink md:text-5xl">
               {company?.company_name ?? context.profile.name ?? "참여기업"}님의 전시 준비 현황
             </h1>
@@ -59,7 +57,7 @@ export default async function CompanyDashboardPage() {
           </div>
 
           <aside className="rounded-[28px] border border-slate-900/10 bg-slate-950 p-6 text-white shadow-soft">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-300">Today</p>
+            <p className="text-sm font-black text-blue-300">오늘 확인할 일</p>
             <h2 className="mt-4 text-2xl font-black">오늘 확인할 일</h2>
             <div className="mt-6 grid gap-3">
               <ActionLine label="요청서 임시저장" value={`${stats[2].value}건`} href="/company/quote-requests" />
@@ -115,7 +113,7 @@ export default async function CompanyDashboardPage() {
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <StatusBadge status={statusLabel(request.status)} />
+                        <StatusBadge status={request.status} />
                         <h3 className="mt-3 text-lg font-black text-booth-ink">{request.title}</h3>
                         <p className="mt-2 text-sm font-bold text-booth-muted">
                           {request.exhibitions?.title ?? "전시회 정보 없음"} · {formatDateRange(request.exhibitions?.start_date, request.exhibitions?.end_date)}

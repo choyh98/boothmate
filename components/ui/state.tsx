@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { statusLabel, statusTone } from "@/lib/format";
 
 type StateProps = {
   title: string;
@@ -51,15 +52,10 @@ export function LoadingState({ title = "불러오는 중입니다." }: { title?:
   );
 }
 
-export function StatusBadge({ status }: { status: string }) {
-  const tone =
-    status === "approved" || status === "active" || status === "open" || status === "selected"
-      ? "bg-emerald-50 text-emerald-700"
-      : status === "rejected" || status === "expired" || status === "suspended" || status === "cancelled"
-        ? "bg-red-50 text-red-700"
-        : status === "inactive" || status === "draft"
-          ? "bg-slate-100 text-slate-600"
-          : "bg-blue-50 text-booth-blue";
-
-  return <span className={`rounded-full px-3 py-1 text-xs font-black ${tone}`}>{status}</span>;
+export function StatusBadge({ status, label }: { status: string; label?: string }) {
+  return (
+    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-black ring-1 ${statusTone(status)}`}>
+      {label ?? statusLabel(status)}
+    </span>
+  );
 }

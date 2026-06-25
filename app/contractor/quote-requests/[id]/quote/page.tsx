@@ -37,7 +37,7 @@ export default async function ContractorQuoteWritePage({ params }: { params: { i
           <span> / 견적 작성</span>
         </div>
         <div className="mb-8">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">Quote</p>
+          <p className="text-sm font-black text-booth-blue">견적 작성</p>
           <h1 className="mt-3 text-4xl font-black text-booth-ink">업체 견적 작성</h1>
           <p className="mt-3 text-base font-semibold text-booth-muted">
             임시저장한 내용은 같은 요청에 자동 복구됩니다.

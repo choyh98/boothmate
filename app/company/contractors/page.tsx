@@ -45,9 +45,7 @@ export default async function CompanyContractorsPage({ searchParams }: CompanyCo
       <main className="mx-auto w-full max-w-6xl px-5 py-10 md:px-8">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-booth-blue">
-              Contractors
-            </p>
+            <p className="text-sm font-black text-booth-blue">인증 전시업체</p>
             <h1 className="mt-3 text-4xl font-black text-booth-ink">전시업체 찾기</h1>
             <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-booth-muted">
               관리자 인증을 통과한 업체의 공개 정보만 확인할 수 있습니다. 견적은 공개 요청을 통해 받는 구조입니다.
