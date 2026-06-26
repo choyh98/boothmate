@@ -57,11 +57,11 @@ export async function AppShell({ children }: AppShellProps) {
           : [];
 
   return (
-    <div className="min-h-screen pt-[106px]">
+    <div className="flex min-h-screen flex-col pt-[94px]">
       <header className="site-header fixed left-1/2 top-[18px] z-20 w-[min(1120px,calc(100%-36px))] -translate-x-1/2 rounded-[24px] border border-slate-900/10 bg-white/90 px-3 py-2 shadow-soft backdrop-blur-xl">
-        <div className="site-header-inner flex min-h-[58px] flex-wrap items-center justify-between gap-4">
+        <div className="site-header-inner flex min-h-[52px] flex-wrap items-center justify-between gap-4">
           <Link className="flex items-center" href={logoHref}>
-            <Image src="/logo.svg" alt="부스메이트" width={136} height={42} priority />
+            <Image src="/logo.svg" alt="부스메이트" width={132} height={29} priority />
           </Link>
           {navItems.length ? (
             <nav className="hidden flex-wrap items-center gap-3 lg:flex lg:gap-7">
@@ -93,7 +93,7 @@ export async function AppShell({ children }: AppShellProps) {
                 <p className="text-xs font-black uppercase text-booth-muted">{roleLabel}</p>
               </div>
               <Link
-                className="header-login rounded-xl border border-booth-line bg-white px-4 py-3 text-sm font-black text-booth-ink shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200"
+                className="header-login rounded-xl border border-booth-line bg-white px-4 py-2 text-sm font-black text-booth-ink shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200"
                 href={dashboardPath}
                 title={`${userLabel} · ${roleLabel}`}
               >
@@ -104,13 +104,13 @@ export async function AppShell({ children }: AppShellProps) {
           ) : (
             <div className="flex items-center gap-3">
               <Link
-                className="header-login rounded-xl border border-booth-line bg-white px-4 py-3 text-sm font-black text-booth-ink shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200"
+                className="header-login rounded-xl border border-booth-line bg-white px-4 py-2 text-sm font-black text-booth-ink shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200"
                 href={dashboardPath}
               >
                 {accountLabel}
               </Link>
               <Link
-                className="header-signup rounded-xl bg-booth-blue px-4 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700"
+                className="header-signup rounded-xl bg-booth-blue px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700"
                 href="/signup"
               >
                 회원가입
@@ -119,7 +119,22 @@ export async function AppShell({ children }: AppShellProps) {
           )}
         </div>
       </header>
-      {children}
+      <div className="flex-1">{children}</div>
+      <footer className="mt-10 border-t border-slate-900/10 bg-[#dfe6ef]">
+        <div className="mx-auto flex w-[min(1120px,calc(100%-36px))] flex-col gap-3 px-1 py-8 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <Image
+              alt="부스메이트"
+              className="grayscale opacity-50"
+              height={28}
+              src="/logo.svg"
+              width={128}
+            />
+            <p className="text-sm font-bold text-slate-500">투명하고 효율적인 전시 부스 매칭 플랫폼</p>
+          </div>
+          <p className="text-xs font-bold text-slate-400">BOOTHMATE</p>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -57,10 +57,10 @@ select {
 }
 
 .site-header-inner {
-  height: 88px;
+  min-height: 52px;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -69,11 +69,11 @@ select {
 .header-login,
 .header-signup {
   display: inline-flex;
-  min-height: 44px;
+  min-height: 38px;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  padding: 0 18px;
+  border-radius: 10px;
+  padding: 0 16px;
   font-size: 14px;
   font-weight: 900;
   transition:
