@@ -127,5 +127,27 @@ export async function getCurrentContractor(ownerId: string): Promise<Contractor 
     .maybeSingle();
 
   if (error) throw error;
-  return data as Contractor | null;
+  if (data) return data as Contractor;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("email,name,role")
+    .eq("id", ownerId)
+    .maybeSingle();
+
+  if (profileError) throw profileError;
+  if (!profile || profile.role !== "contractor") return null;
+
+  const fallbackCompanyName = profile.name ?? profile.email ?? "전시업체";
+  const { data: createdContractor, error: createError } = await supabase
+    .from("contractors")
+    .insert({
+      owner_id: ownerId,
+      company_name: fallbackCompanyName
+    })
+    .select("id,owner_id,company_name,business_number,description,service_regions,booth_types,minimum_budget,verification_status,subscription_status,subscription_expires_at")
+    .single();
+
+  if (createError) throw createError;
+  return createdContractor as Contractor;
 }

@@ -14,12 +14,21 @@ export default async function ContractorQuoteRequestDetailPage({ params }: { par
   const context = await requireRole("contractor");
   let request: QuoteRequest;
   let quote: Quote | null = null;
+  let quoteStatusError = "";
 
   try {
     request = await getOpenQuoteRequest(params.id);
-    quote = await getMyQuoteForRequest(context.userId, params.id);
   } catch {
     notFound();
+  }
+
+  try {
+    quote = await getMyQuoteForRequest(context.userId, params.id);
+  } catch (error) {
+    quoteStatusError =
+      error instanceof Error
+        ? error.message
+        : "내 견적 상태를 불러오지 못했습니다. 전시업체 정보와 구독 상태를 확인해주세요.";
   }
 
   const submittedQuoteId = quote && quote.status !== "draft" ? quote.id : null;
@@ -58,15 +67,26 @@ export default async function ContractorQuoteRequestDetailPage({ params }: { par
           <aside className="rounded-[28px] border border-white/80 bg-white p-6 shadow-soft">
             <h2 className="text-lg font-black text-booth-ink">내 견적 상태</h2>
             <p className="mt-3 text-sm font-bold leading-7 text-booth-muted">
-              {submittedQuoteId
+              {quoteStatusError
+                ? "공개 요청은 확인할 수 있지만, 내 견적 상태를 불러오지 못했습니다."
+                : submittedQuoteId
                 ? "이미 이 요청에 견적을 최종 제출했습니다."
                 : quote
                   ? "임시저장한 견적이 있습니다. 이어서 작성할 수 있습니다."
                   : "이 요청에 제출할 견적을 작성할 수 있습니다."}
             </p>
+            {quoteStatusError ? (
+              <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-6 text-amber-800">
+                {quoteStatusError}
+              </p>
+            ) : null}
             {submittedQuoteId ? (
               <Link className="mt-5 block rounded-xl bg-booth-blue px-5 py-4 text-center text-sm font-black text-white" href={`/contractor/quotes/${submittedQuoteId}`}>
                 제출한 견적 보기
+              </Link>
+            ) : quoteStatusError ? (
+              <Link className="mt-5 block rounded-xl border border-booth-line px-5 py-4 text-center text-sm font-black text-booth-ink" href="/contractor/dashboard">
+                대시보드에서 계정 상태 확인
               </Link>
             ) : (
               <Link className="mt-5 block rounded-xl bg-booth-blue px-5 py-4 text-center text-sm font-black text-white" href={`/contractor/quote-requests/${request.id}/quote`}>
