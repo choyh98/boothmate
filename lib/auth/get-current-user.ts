@@ -77,7 +77,29 @@ export async function getCurrentCompany(ownerId: string): Promise<Company | null
     .maybeSingle();
 
   if (error) throw error;
-  return data as Company | null;
+  if (data) return data as Company;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("email,name,role")
+    .eq("id", ownerId)
+    .maybeSingle();
+
+  if (profileError) throw profileError;
+  if (!profile || profile.role !== "company") return null;
+
+  const fallbackCompanyName = profile.name ?? profile.email ?? "참여기업";
+  const { data: createdCompany, error: createError } = await supabase
+    .from("companies")
+    .insert({
+      owner_id: ownerId,
+      company_name: fallbackCompanyName
+    })
+    .select("id,owner_id,company_name,business_number,industry,website,verification_status")
+    .single();
+
+  if (createError) throw createError;
+  return createdCompany as Company;
 }
 
 export async function getCurrentContractor(ownerId: string): Promise<Contractor | null> {

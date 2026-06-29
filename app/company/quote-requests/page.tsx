@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { StatusBadge } from "@/components/ui/state";
+import { InlineNotice, StatusBadge } from "@/components/ui/state";
 import { formatCurrency, formatDateRange } from "@/lib/format";
 import { listMyQuoteRequests } from "@/lib/quote-requests/queries";
 import { requireRole } from "@/lib/auth/require-role";
@@ -36,9 +36,12 @@ export default async function MyQuoteRequestsPage() {
         </div>
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-bold text-red-700">
-            {errorMessage}
-          </div>
+          <InlineNotice
+            title="견적 요청 목록을 불러오지 못했습니다."
+            description={errorMessage}
+            actionHref="/company/dashboard"
+            actionLabel="대시보드로 이동"
+          />
         ) : null}
 
         {!errorMessage && requests.length === 0 ? (

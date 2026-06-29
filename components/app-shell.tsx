@@ -38,6 +38,7 @@ export async function AppShell({ children }: AppShellProps) {
           ["견적요청", "/company/quote-requests/new"],
           ["내 요청", "/company/quote-requests"],
           ["전시업체 찾기", "/company/contractors"],
+          ["프로필", "/company/profile"],
           ["이용방법", "/company/guide"]
         ]
       : role === "contractor"
@@ -65,7 +66,7 @@ export async function AppShell({ children }: AppShellProps) {
             <Image src="/logo.svg" alt="부스메이트" width={132} height={29} priority />
           </Link>
           {navItems.length ? (
-            <nav className="hidden flex-wrap items-center gap-3 lg:flex lg:gap-7">
+            <nav className="hidden flex-wrap items-center gap-3 xl:flex xl:gap-7">
               {navItems.map(([label, href]) => (
                 <Link className="text-sm font-black text-slate-700 transition hover:-translate-y-0.5 hover:text-booth-blue" href={href} key={href}>
                   {label}
@@ -73,22 +74,29 @@ export async function AppShell({ children }: AppShellProps) {
               ))}
             </nav>
           ) : null}
-          {navItems.length ? (
-            <details className="relative lg:hidden">
+          {role ? (
+            <details className="relative xl:hidden">
               <summary className="list-none rounded-xl border border-booth-line bg-white px-4 py-3 text-sm font-black text-booth-ink shadow-sm">
                 메뉴
               </summary>
-              <div className="absolute right-0 top-14 z-30 grid min-w-48 gap-1 rounded-2xl border border-booth-line bg-white p-2 shadow-soft">
+              <div className="absolute right-0 top-14 z-30 grid min-w-56 gap-1 rounded-2xl border border-booth-line bg-white p-2 shadow-soft">
+                <Link className="rounded-xl px-4 py-3 text-sm font-black text-booth-ink hover:bg-blue-50 hover:text-booth-blue" href={dashboardPath}>
+                  대시보드
+                </Link>
                 {navItems.map(([label, href]) => (
                   <Link className="rounded-xl px-4 py-3 text-sm font-black text-booth-ink hover:bg-blue-50 hover:text-booth-blue" href={href} key={href}>
                     {label}
                   </Link>
                 ))}
+                <div className="mt-1 border-t border-booth-line pt-2">
+                  <p className="px-4 py-2 text-xs font-black uppercase text-booth-muted">{roleLabel}</p>
+                  <p className="truncate px-4 pb-2 text-sm font-black text-booth-ink">{userLabel}</p>
+                </div>
               </div>
             </details>
           ) : null}
           {role ? (
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="hidden flex-wrap items-center gap-3 xl:flex">
               <div className="hidden text-right md:block">
                 <p className="max-w-[180px] truncate text-sm font-black text-booth-ink">{userLabel}</p>
                 <p className="text-xs font-black uppercase text-booth-muted">{roleLabel}</p>
@@ -98,7 +106,7 @@ export async function AppShell({ children }: AppShellProps) {
                 href={dashboardPath}
                 title={`${userLabel} · ${roleLabel}`}
               >
-                내정보
+                대시보드
               </Link>
               <LogoutButton />
             </div>

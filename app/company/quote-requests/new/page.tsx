@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell";
+import { InlineNotice } from "@/components/ui/state";
 import { QuoteRequestWizard } from "@/components/quote-requests/quote-request-wizard";
 import { listExhibitions } from "@/lib/exhibitions/queries";
 import { getMyQuoteRequest } from "@/lib/quote-requests/queries";
@@ -42,9 +43,12 @@ export default async function NewQuoteRequestPage({ searchParams }: NewQuoteRequ
         </div>
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-bold text-red-700">
-            {errorMessage}
-          </div>
+          <InlineNotice
+            title="견적 요청 화면을 준비하지 못했습니다."
+            description={errorMessage}
+            actionHref="/company/dashboard"
+            actionLabel="대시보드로 이동"
+          />
         ) : (
           <QuoteRequestWizard
             exhibitions={exhibitions}

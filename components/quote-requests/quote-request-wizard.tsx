@@ -116,6 +116,17 @@ export function QuoteRequestWizard({
     window.localStorage.setItem(storageKey, JSON.stringify(form));
   }, [form, storageKey]);
 
+  useEffect(() => {
+    if (!message && !error) return;
+
+    const timeout = window.setTimeout(() => {
+      setMessage("");
+      setError("");
+    }, 4500);
+
+    return () => window.clearTimeout(timeout);
+  }, [message, error]);
+
   function patch(patchValue: Partial<QuoteRequestFormData>) {
     setForm((current) => ({ ...current, ...patchValue }));
   }
@@ -171,8 +182,8 @@ export function QuoteRequestWizard({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)_320px]">
-      <aside className="self-start rounded-[20px] border border-white/80 bg-white p-4 shadow-sm lg:sticky lg:top-28">
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[220px_minmax(0,1fr)_300px]">
+      <aside className="min-w-0 self-start rounded-[20px] border border-white/80 bg-white p-4 shadow-sm xl:sticky xl:top-28">
         <div className="mb-5 rounded-2xl bg-slate-50 p-4">
           <p className="text-xs font-black text-booth-muted">작성 진행률</p>
           <p className="mt-1 text-2xl font-black text-booth-ink">{completion}%</p>
@@ -201,7 +212,7 @@ export function QuoteRequestWizard({
         </nav>
       </aside>
 
-      <section className="rounded-[24px] border border-white/80 bg-white p-5 shadow-sm md:p-7">
+      <section className="min-w-0 rounded-[24px] border border-white/80 bg-white p-5 shadow-sm md:p-7">
         {message ? <Notice tone="success">{message}</Notice> : null}
         {error ? <Notice tone="error">{error}</Notice> : null}
 
@@ -237,7 +248,7 @@ export function QuoteRequestWizard({
             title="부스 규모와 기본 조건을 입력해주세요."
             description="업체가 견적 가능 여부를 판단하는 가장 중요한 정보입니다."
           >
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
               <Field label="요청 제목" value={form.title} onChange={(value) => patch({ title: value })} />
               <Field
                 label="부스 수"
@@ -250,7 +261,7 @@ export function QuoteRequestWizard({
               <Field label="전체 면적(㎡)" value={form.boothArea} onChange={(value) => patch({ boothArea: value })} type="number" />
               <label className="grid gap-2 text-sm font-black text-booth-ink">
                 오픈 면
-                <select className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue" value={form.openSides} onChange={(event) => patch({ openSides: event.target.value })}>
+                <select className="w-full min-w-0 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue" value={form.openSides} onChange={(event) => patch({ openSides: event.target.value })}>
                   {openSides.map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
@@ -268,19 +279,19 @@ export function QuoteRequestWizard({
             title="예산과 견적 마감 시간을 정해주세요."
             description="예산 범위와 마감 시간이 명확할수록 업체가 현실적인 견적을 제출할 수 있습니다."
           >
-            <div className="grid items-end gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 items-end gap-4 md:grid-cols-2">
               <BudgetRangeSelect
                 max={form.budgetMax}
                 min={form.budgetMin}
                 onSelect={(range) => patch({ budgetMin: range.min, budgetMax: range.max })}
               />
-              <label className="flex h-12 items-center gap-3 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-black text-booth-ink">
+              <label className="flex h-12 min-w-0 items-center gap-3 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-black text-booth-ink">
                 <input checked={form.vatIncluded} onChange={(event) => patch({ vatIncluded: event.target.checked })} type="checkbox" />
                 부가세 포함 예산입니다.
               </label>
               <label className="grid gap-2 text-sm font-black text-booth-ink">
                 견적 마감 시간
-                <select className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue" value={form.deadlineHours} onChange={(event) => patch({ deadlineHours: event.target.value })}>
+                <select className="w-full min-w-0 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue" value={form.deadlineHours} onChange={(event) => patch({ deadlineHours: event.target.value })}>
                   <option value="24">24시간 후 마감</option>
                   <option value="48">48시간 후 마감</option>
                   <option value="72">72시간 후 마감</option>
@@ -297,7 +308,7 @@ export function QuoteRequestWizard({
             description="세부 요청은 업체의 포함 항목과 제안 품질에 직접 영향을 줍니다."
           >
             <h3 className="text-sm font-black text-booth-ink">필요 시설</h3>
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {facilityItems.map((item) => (
                 <label className="rounded-2xl border border-booth-line bg-slate-50 p-4 text-sm font-black text-booth-ink" key={item}>
                   {item}
@@ -389,7 +400,7 @@ export function QuoteRequestWizard({
         </div>
       </section>
 
-      <aside className="self-start rounded-[24px] border border-white/80 bg-white p-5 shadow-sm lg:sticky lg:top-28">
+      <aside className="min-w-0 self-start rounded-[24px] border border-white/80 bg-white p-5 shadow-sm xl:sticky xl:top-28">
         <p className="text-xs font-black uppercase tracking-[0.16em] text-booth-blue">Request Summary</p>
         <h2 className="mt-3 text-lg font-black text-booth-ink">실시간 요청서 요약</h2>
         <SummaryList form={form} exhibitionTitle={selectedExhibition?.title ?? "선택 전"} compact />
@@ -477,9 +488,9 @@ function Field({
   helper?: string;
 }) {
   return (
-    <label className="grid gap-2 text-sm font-black text-booth-ink">
+    <label className="grid min-w-0 gap-2 text-sm font-black text-booth-ink">
       {label}
-      <input className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue" onChange={(event) => onChange(event.target.value)} type={type} value={value} />
+      <input className="w-full min-w-0 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue" onChange={(event) => onChange(event.target.value)} type={type} value={value} />
       {helper ? <span className="text-xs font-bold text-booth-muted">{helper}</span> : null}
     </label>
   );
@@ -487,9 +498,9 @@ function Field({
 
 function ChoiceGrid({ values, selected, onToggle }: { values: string[]; selected: string[]; onToggle: (value: string) => void }) {
   return (
-    <div className="mt-3 grid gap-3 md:grid-cols-2">
+    <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2">
       {values.map((value) => (
-        <button className={`rounded-2xl border p-5 text-left text-sm font-black transition ${selected.includes(value) ? "border-booth-blue bg-blue-50 text-booth-blue" : "border-booth-line bg-slate-50 text-booth-ink"}`} key={value} onClick={() => onToggle(value)} type="button">
+        <button className={`min-w-0 rounded-2xl border p-4 text-left text-sm font-black transition md:p-5 ${selected.includes(value) ? "border-booth-blue bg-blue-50 text-booth-blue" : "border-booth-line bg-slate-50 text-booth-ink"}`} key={value} onClick={() => onToggle(value)} type="button">
           {value}
         </button>
       ))}
@@ -509,10 +520,10 @@ function BudgetRangeSelect({
   const selectedValue = `${min}|${max}`;
 
   return (
-    <label className="grid gap-2 text-sm font-black text-booth-ink">
+    <label className="grid min-w-0 gap-2 text-sm font-black text-booth-ink">
       희망 예산 범위
       <select
-        className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue"
+        className="w-full min-w-0 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue"
         onChange={(event) => {
           const range = budgetRanges.find((item) => `${item.min}|${item.max}` === event.target.value);
           if (range) onSelect(range);
@@ -543,9 +554,9 @@ function SummaryList({ form, exhibitionTitle, compact = false }: { form: QuoteRe
   return (
     <dl className={compact ? "mt-4 grid gap-3" : "grid gap-3 md:grid-cols-2"}>
       {rows.map(([label, value]) => (
-        <div className="rounded-xl bg-slate-50 p-4" key={label}>
+        <div className="min-w-0 rounded-xl bg-slate-50 p-4" key={label}>
           <dt className="text-xs font-black text-booth-muted">{label}</dt>
-          <dd className="mt-1 text-sm font-black leading-6 text-booth-ink">{value}</dd>
+          <dd className="mt-1 break-words text-sm font-black leading-6 text-booth-ink">{value}</dd>
         </div>
       ))}
     </dl>

@@ -26,9 +26,23 @@ export function EmptyState({ title, description, actionHref, actionLabel }: Stat
 
 export function ErrorState({ title, description }: StateProps) {
   return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-bold leading-7 text-red-700">
+    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm font-bold leading-7 text-amber-800">
       <p className="font-black">{title}</p>
       {description ? <p className="mt-1">{description}</p> : null}
+    </div>
+  );
+}
+
+export function InlineNotice({ title, description, actionHref, actionLabel }: StateProps) {
+  return (
+    <div className="rounded-2xl border border-booth-line bg-white p-5 text-sm font-bold leading-7 text-booth-muted shadow-sm">
+      <p className="font-black text-booth-ink">{title}</p>
+      {description ? <p className="mt-1">{description}</p> : null}
+      {actionHref && actionLabel ? (
+        <Link className="mt-4 inline-flex rounded-xl border border-booth-line bg-slate-50 px-4 py-2 text-sm font-black text-booth-ink" href={actionHref}>
+          {actionLabel}
+        </Link>
+      ) : null}
     </div>
   );
 }
