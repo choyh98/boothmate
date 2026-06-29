@@ -93,8 +93,7 @@ export function ReceivedQuotesList({ quoteRequestId, quotes }: ReceivedQuotesLis
                   </p>
                 </div>
               </div>
-              <dl className="mt-4 grid gap-3 md:grid-cols-3">
-                <MiniFact label="제작 기간" value={quote.production_days !== null ? `${quote.production_days}일` : "미정"} />
+              <dl className="mt-4 grid gap-3 md:grid-cols-2">
                 <MiniFact label="1차 디자인" value={quote.first_design_date ?? "미정"} />
                 <MiniFact label="수정 횟수" value={quote.revision_count !== null ? `${quote.revision_count}회` : "미정"} />
               </dl>

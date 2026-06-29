@@ -1,4 +1,9 @@
 import { getCompanyOrThrow } from "@/lib/quote-requests/queries";
+import { isDevQuoteRequestOwner } from "@/lib/quote-requests/dev-store";
+import {
+  getDevCompanyQuote,
+  listDevCompanyQuotesForRequest
+} from "@/lib/quotes/dev-store";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ContractorPublicProfile, Quote } from "@/types/quote";
 
@@ -41,6 +46,10 @@ async function attachContractorProfiles(quotes: Quote[]) {
 
 export async function listCompanyQuotesForRequest(ownerId: string, quoteRequestId: string) {
   const company = await getCompanyOrThrow(ownerId);
+  if (isDevQuoteRequestOwner(ownerId)) {
+    return listDevCompanyQuotesForRequest(company.id, quoteRequestId);
+  }
+
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("quotes")
@@ -56,6 +65,10 @@ export async function listCompanyQuotesForRequest(ownerId: string, quoteRequestI
 
 export async function getCompanyQuote(ownerId: string, quoteId: string) {
   const company = await getCompanyOrThrow(ownerId);
+  if (isDevQuoteRequestOwner(ownerId)) {
+    return getDevCompanyQuote(company.id, quoteId);
+  }
+
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("quotes")

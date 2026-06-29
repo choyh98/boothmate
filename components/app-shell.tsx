@@ -36,6 +36,7 @@ export async function AppShell({ children }: AppShellProps) {
       ? [
           ["전시일정", "/exhibitions"],
           ["견적요청", "/company/quote-requests/new"],
+          ["내 요청", "/company/quote-requests"],
           ["전시업체 찾기", "/company/contractors"],
           ["이용방법", "/company/guide"]
         ]

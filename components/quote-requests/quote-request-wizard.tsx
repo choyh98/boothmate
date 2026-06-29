@@ -15,10 +15,24 @@ type WizardProps = {
 };
 
 const boothTypes = ["목공부스", "블록·모듈부스", "시스템부스", "팝업형 부스", "업체 추천"];
-const designStyles = ["미니멀", "프리미엄", "테크", "친환경", "컬러풀", "따뜻한 분위기", "자유 제안"];
-const facilityItems = ["안내데스크", "상담 테이블", "의자", "제품 전시대", "창고", "TV 모니터", "LED 스크린", "조명", "전기", "바닥 시공", "그래픽 출력", "간판", "운송", "설치", "철거"];
+const facilityItems = ["안내데스크", "상담 테이블", "의자", "제품 전시대", "창고", "TV 모니터", "LED 스크린", "파이텍스", "그래픽 출력"];
+const floorColors = ["청색", "회색", "적색", "녹색", "기타"];
 const openSides = ["1면 오픈", "2면 오픈", "3면 오픈", "4면 오픈", "위치 미정"];
 const steps = ["전시회 정보", "부스 기본 조건", "예산과 일정", "상세 요청사항", "최종 확인"];
+const budgetRanges = [
+  { label: "300만원 이하", min: "", max: "3000000" },
+  { label: "300만원 - 500만원", min: "3000000", max: "5000000" },
+  { label: "500만원 - 1,000만원", min: "5000000", max: "10000000" },
+  { label: "1,000만원 - 1,500만원", min: "10000000", max: "15000000" },
+  { label: "1,500만원 - 2,000만원", min: "15000000", max: "20000000" },
+  { label: "2,000만원 - 2,500만원", min: "20000000", max: "25000000" },
+  { label: "2,500만원 - 3,000만원", min: "25000000", max: "30000000" },
+  { label: "3,000만원 - 3,500만원", min: "30000000", max: "35000000" },
+  { label: "3,500만원 - 4,000만원", min: "35000000", max: "40000000" },
+  { label: "4,000만원 - 4,500만원", min: "40000000", max: "45000000" },
+  { label: "4,500만원 - 5,000만원", min: "45000000", max: "50000000" },
+  { label: "5,000만원 이상", min: "50000000", max: "" }
+];
 
 function requestToForm(request: QuoteRequest): QuoteRequestFormData {
   return {
@@ -34,7 +48,9 @@ function requestToForm(request: QuoteRequest): QuoteRequestFormData {
     budgetMin: request.budget_min ? String(request.budget_min) : "",
     budgetMax: request.budget_max ? String(request.budget_max) : "",
     vatIncluded: request.vat_included,
-    requiredItems: request.required_items ?? {},
+    requiredItems: cleanVisibleRequiredItems(request.required_items ?? {}),
+    floorColor: floorColorFromRequirements(request.requirements),
+    floorColorOther: floorColorOtherFromRequirements(request.requirements),
     designStyles: request.design_styles ?? [],
     requirements: request.requirements ?? "",
     deadlineHours: "48"
@@ -70,6 +86,7 @@ export function QuoteRequestWizard({
   );
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [floorExampleOpen, setFloorExampleOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const selectedExhibition = useMemo(
     () => exhibitions.find((item) => item.id === form.exhibitionId),
@@ -83,7 +100,12 @@ export function QuoteRequestWizard({
     if (!saved) return;
     try {
       const parsed = JSON.parse(saved) as QuoteRequestFormData;
-      setForm(parsed);
+      setForm({
+        ...parsed,
+        floorColor: parsed.floorColor ?? "",
+        floorColorOther: parsed.floorColorOther ?? "",
+        requiredItems: cleanVisibleRequiredItems(parsed.requiredItems ?? {})
+      });
       setMessage("브라우저에 보관된 작성 내용을 불러왔습니다. 서버 저장은 임시저장을 눌러야 완료됩니다.");
     } catch {
       window.localStorage.removeItem(storageKey);
@@ -218,7 +240,6 @@ export function QuoteRequestWizard({
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="요청 제목" value={form.title} onChange={(value) => patch({ title: value })} />
               <Field
-                helper="1부스는 보통 9㎡ 기준입니다."
                 label="부스 수"
                 value={form.boothCount}
                 onChange={(value) => patch({ boothCount: value, boothArea: value ? String(Number(value) * 9) : form.boothArea })}
@@ -247,10 +268,13 @@ export function QuoteRequestWizard({
             title="예산과 견적 마감 시간을 정해주세요."
             description="예산 범위와 마감 시간이 명확할수록 업체가 현실적인 견적을 제출할 수 있습니다."
           >
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="최소 예산(원)" value={form.budgetMin} onChange={(value) => patch({ budgetMin: value })} type="number" />
-              <Field label="최대 예산(원)" value={form.budgetMax} onChange={(value) => patch({ budgetMax: value })} type="number" />
-              <label className="flex min-h-12 items-center gap-3 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-black text-booth-ink">
+            <div className="grid items-end gap-4 md:grid-cols-2">
+              <BudgetRangeSelect
+                max={form.budgetMax}
+                min={form.budgetMin}
+                onSelect={(range) => patch({ budgetMin: range.min, budgetMax: range.max })}
+              />
+              <label className="flex h-12 items-center gap-3 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-black text-booth-ink">
                 <input checked={form.vatIncluded} onChange={(event) => patch({ vatIncluded: event.target.checked })} type="checkbox" />
                 부가세 포함 예산입니다.
               </label>
@@ -269,7 +293,7 @@ export function QuoteRequestWizard({
         {step === 3 ? (
           <StepBlock
             eyebrow="STEP 4"
-            title="필요 시설과 디자인 요청을 알려주세요."
+            title="필요 시설과 상세 요청사항을 알려주세요."
             description="세부 요청은 업체의 포함 항목과 제안 품질에 직접 영향을 줍니다."
           >
             <h3 className="text-sm font-black text-booth-ink">필요 시설</h3>
@@ -289,8 +313,32 @@ export function QuoteRequestWizard({
               ))}
             </div>
             <div className="mt-6">
-              <h3 className="text-sm font-black text-booth-ink">디자인 방향</h3>
-              <ChoiceGrid values={designStyles} selected={form.designStyles} onToggle={(value) => toggleList("designStyles", value)} />
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="text-sm font-black text-booth-ink">바닥색</h3>
+                <button className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-black text-booth-blue transition hover:border-booth-blue" onClick={() => setFloorExampleOpen(true)} type="button">
+                  예시 보기
+                </button>
+              </div>
+              <ChoiceGrid
+                values={floorColors}
+                selected={form.floorColor ? [form.floorColor] : []}
+                onToggle={(value) => {
+                  const nextFloorColor = form.floorColor === value ? "" : value;
+                  patch({
+                    floorColor: nextFloorColor,
+                    floorColorOther: nextFloorColor === "기타" ? form.floorColorOther : ""
+                  });
+                }}
+              />
+              {form.floorColor === "기타" ? (
+                <div className="mt-3">
+                  <Field
+                    label="기타 바닥색"
+                    value={form.floorColorOther}
+                    onChange={(value) => patch({ floorColorOther: value })}
+                  />
+                </div>
+              ) : null}
             </div>
             <label className="mt-6 grid gap-2 text-sm font-black text-booth-ink">
               상세 요청사항
@@ -346,6 +394,20 @@ export function QuoteRequestWizard({
         <h2 className="mt-3 text-lg font-black text-booth-ink">실시간 요청서 요약</h2>
         <SummaryList form={form} exhibitionTitle={selectedExhibition?.title ?? "선택 전"} compact />
       </aside>
+
+      {floorExampleOpen ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-5" role="dialog" aria-modal="true" aria-label="바닥색 예시">
+          <div className="w-full max-w-3xl rounded-[24px] bg-white p-4 shadow-soft">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-black text-booth-ink">바닥색 예시</h2>
+              <button className="rounded-xl border border-booth-line px-4 py-2 text-sm font-black text-booth-ink" onClick={() => setFloorExampleOpen(false)} type="button">
+                닫기
+              </button>
+            </div>
+            <img alt="파이텍스 바닥색 예시" className="max-h-[72vh] w-full rounded-2xl object-contain" src="/assets/example.jpg" />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -357,8 +419,7 @@ function getCompletion(form: QuoteRequestFormData) {
     Boolean(form.boothCount || form.boothArea),
     form.boothTypes.length > 0,
     Boolean(form.budgetMax || form.budgetMin),
-    Object.keys(form.requiredItems).length > 0,
-    form.designStyles.length > 0,
+    Object.keys(form.requiredItems).length > 0 || Boolean(form.floorColor),
     Boolean(form.requirements.trim())
   ];
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
@@ -436,15 +497,48 @@ function ChoiceGrid({ values, selected, onToggle }: { values: string[]; selected
   );
 }
 
+function BudgetRangeSelect({
+  min,
+  max,
+  onSelect
+}: {
+  min: string;
+  max: string;
+  onSelect: (range: (typeof budgetRanges)[number]) => void;
+}) {
+  const selectedValue = `${min}|${max}`;
+
+  return (
+    <label className="grid gap-2 text-sm font-black text-booth-ink">
+      희망 예산 범위
+      <select
+        className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue"
+        onChange={(event) => {
+          const range = budgetRanges.find((item) => `${item.min}|${item.max}` === event.target.value);
+          if (range) onSelect(range);
+        }}
+        value={selectedValue}
+      >
+        <option value="|">예산 범위를 선택해주세요</option>
+        {budgetRanges.map((range) => (
+          <option key={range.label} value={`${range.min}|${range.max}`}>
+            {range.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function SummaryList({ form, exhibitionTitle, compact = false }: { form: QuoteRequestFormData; exhibitionTitle: string; compact?: boolean }) {
   const rows = [
     ["전시회", exhibitionTitle],
     ["부스 규모", form.boothCount ? `${form.boothCount}부스 / ${form.boothArea || "면적 미정"}㎡` : "미입력"],
     ["부스 유형", form.boothTypes.join(", ") || "선택 전"],
-    ["예산", form.budgetMin || form.budgetMax ? `${moneyText(form.budgetMin) || "0원"} ~ ${moneyText(form.budgetMax) || "미정"}` : "미정"],
+    ["예산", budgetText(form)],
     ["견적 마감", `${form.deadlineHours}시간 후`],
-    ["필요 시설", Object.keys(form.requiredItems).length ? Object.entries(form.requiredItems).map(([key, value]) => `${key} ${value}`).join(", ") : "선택 전"],
-    ["디자인", form.designStyles.join(", ") || "선택 전"]
+    ["바닥색", floorColorText(form)],
+    ["필요 시설", Object.keys(form.requiredItems).length ? Object.entries(form.requiredItems).map(([key, value]) => `${key} ${value}`).join(", ") : "선택 전"]
   ];
   return (
     <dl className={compact ? "mt-4 grid gap-3" : "grid gap-3 md:grid-cols-2"}>
@@ -456,6 +550,38 @@ function SummaryList({ form, exhibitionTitle, compact = false }: { form: QuoteRe
       ))}
     </dl>
   );
+}
+
+function budgetText(form: Pick<QuoteRequestFormData, "budgetMin" | "budgetMax">) {
+  if (!form.budgetMin && !form.budgetMax) return "미정";
+
+  const selectedRange = budgetRanges.find(
+    (range) => range.min === form.budgetMin && range.max === form.budgetMax
+  );
+  if (selectedRange) return selectedRange.label;
+
+  return `${moneyText(form.budgetMin) || "0원"} ~ ${moneyText(form.budgetMax) || "미정"}`;
+}
+
+function floorColorFromRequirements(requirements: string | null) {
+  const match = requirements?.match(/바닥색:\s*(청색|회색|적색|녹색|기타)(?:\s*\(([^)]+)\))?/);
+  return match?.[1] ?? "";
+}
+
+function floorColorOtherFromRequirements(requirements: string | null) {
+  const match = requirements?.match(/바닥색:\s*기타(?:\s*\(([^)]+)\))?/);
+  return match?.[1] ?? "";
+}
+
+function floorColorText(form: Pick<QuoteRequestFormData, "floorColor" | "floorColorOther">) {
+  if (!form.floorColor) return "선택 전";
+  if (form.floorColor === "기타" && form.floorColorOther.trim()) return `기타 (${form.floorColorOther.trim()})`;
+  return form.floorColor;
+}
+
+function cleanVisibleRequiredItems(items: RequiredItems) {
+  const visibleItems = new Set(facilityItems);
+  return Object.fromEntries(Object.entries(items).filter(([key]) => visibleItems.has(key)));
 }
 
 function moneyText(value: string) {

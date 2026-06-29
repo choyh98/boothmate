@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { getCurrentUserContext } from "@/lib/auth/get-current-user";
 import { getDashboardPath } from "@/lib/auth/routes";
 import type { UserRole } from "@/types/auth";
@@ -21,6 +21,6 @@ export async function redirectSignedInUser() {
   const context = await getCurrentUserContext();
 
   if (context) {
-    redirect(getDashboardPath(context.profile.role));
+    redirect(getDashboardPath(context.profile.role), RedirectType.replace);
   }
 }

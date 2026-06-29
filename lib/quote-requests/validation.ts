@@ -14,6 +14,8 @@ export function emptyQuoteRequestForm(exhibitionId = ""): QuoteRequestFormData {
     budgetMax: "",
     vatIncluded: true,
     requiredItems: {},
+    floorColor: "",
+    floorColorOther: "",
     designStyles: [],
     requirements: "",
     deadlineHours: "48"

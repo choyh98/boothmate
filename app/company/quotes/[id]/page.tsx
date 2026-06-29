@@ -66,7 +66,6 @@ export default async function CompanyQuoteDetailPage({ params }: { params: { id:
               <Info label="인증 상태" value={profile?.verification_status ?? "비공개"} />
               <Info label="1차 디자인 제공일" value={quote.first_design_date ?? "미정"} />
               <Info label="수정 가능 횟수" value={quote.revision_count !== null ? `${quote.revision_count}회` : "미정"} />
-              <Info label="제작 기간" value={quote.production_days !== null ? `${quote.production_days}일` : "미정"} />
               <Info label="견적 유효기간" value={quote.valid_until ?? "미정"} />
             </div>
 
@@ -84,8 +83,6 @@ export default async function CompanyQuoteDetailPage({ params }: { params: { id:
               <Info label="기타 비용" value={formatCurrency(quote.other_cost)} />
             </div>
 
-            <TextBlock label="포함 항목" value={quote.included_items} />
-            <TextBlock label="불포함 항목" value={quote.excluded_items} />
             <TextBlock label="제안 내용" value={quote.proposal} />
           </div>
 

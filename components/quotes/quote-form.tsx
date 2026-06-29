@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { saveQuoteAction } from "@/app/contractor/quote-requests/actions";
 import { formatCurrency, formatDateRange } from "@/lib/format";
@@ -27,6 +27,7 @@ const costFields: Array<[keyof QuoteFormData, string]> = [
   ["furnitureCost", "집기"],
   ["otherCost", "기타 비용"]
 ];
+const boothTypes = ["목공부스", "블록·모듈부스", "시스템부스", "팝업형 부스"];
 
 function numeric(value: string) {
   const parsed = Number(value.replaceAll(",", ""));
@@ -46,11 +47,16 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
     () => costFields.reduce((sum, [key]) => sum + numeric(String(form[key] ?? "")), 0),
     [form]
   );
-  const previewTotal = numeric(form.totalPrice) || costTotal;
-  const totalPriceValue = numeric(form.totalPrice);
-  const hasCostMismatch = totalPriceValue > 0 && costTotal > 0 && totalPriceValue !== costTotal;
+  const previewTotal = costTotal;
   const isSubmitted = initialQuote?.status && initialQuote.status !== "draft";
   const canSubmitWithSubscription = contractor.subscription_status === "active" || contractor.subscription_status === "trial";
+
+  useEffect(() => {
+    const nextTotalPrice = costTotal > 0 ? String(costTotal) : "";
+    setForm((current) => (
+      current.totalPrice === nextTotalPrice ? current : { ...current, totalPrice: nextTotalPrice }
+    ));
+  }, [costTotal]);
 
   function patch(patchValue: Partial<QuoteFormData>) {
     setForm((current) => ({ ...current, ...patchValue }));
@@ -111,26 +117,17 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
             title="기본 견적"
             description="참여기업이 목록에서 가장 먼저 확인하는 정보입니다."
           >
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="제안 부스 유형" value={form.boothType} onChange={(value) => patch({ boothType: value })} />
-              <Field label="총 견적 금액(원)" value={form.totalPrice} onChange={(value) => patch({ totalPrice: value })} type="number" />
-              <label className="flex min-h-12 items-center gap-3 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-black text-booth-ink">
+            <div className="grid items-end gap-4 md:grid-cols-2">
+              <Field label="총 견적 금액(원)" value={form.totalPrice} onChange={() => undefined} readOnly type="number" />
+              <label className="flex h-[46px] items-center gap-3 rounded-xl border border-booth-line bg-slate-50 px-4 py-3 text-sm font-black text-booth-ink">
                 <input checked={form.vatIncluded} onChange={(event) => patch({ vatIncluded: event.target.checked })} type="checkbox" />
                 부가세 포함 금액입니다.
               </label>
             </div>
-            {hasCostMismatch ? (
-              <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-6 text-amber-800">
-                총 견적 금액과 상세 비용 합계가 다릅니다. 총액 {formatCurrency(totalPriceValue)}, 상세 합계 {formatCurrency(costTotal)}입니다.
-                <button
-                  className="ml-2 font-black text-booth-blue underline underline-offset-4"
-                  onClick={() => patch({ totalPrice: String(costTotal) })}
-                  type="button"
-                >
-                  상세 합계로 맞추기
-                </button>
-              </div>
-            ) : null}
+            <div className="mt-5">
+              <h3 className="text-sm font-black text-booth-ink">제안 부스 유형</h3>
+              <ChoiceGrid values={boothTypes} selected={form.boothType ? [form.boothType] : []} onToggle={(value) => patch({ boothType: form.boothType === value ? "" : value })} />
+            </div>
           </FormSection>
 
           <FormSection
@@ -153,28 +150,20 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
 
           <FormSection
             index="3"
-            title="포함 및 제외 항목"
-            description="나중에 분쟁이 생기기 쉬운 범위를 명확히 구분해주세요."
-          >
-            <Textarea label="포함 항목" value={form.includedItems} onChange={(value) => patch({ includedItems: value })} />
-            <Textarea label="제외 항목" value={form.excludedItems} onChange={(value) => patch({ excludedItems: value })} />
-          </FormSection>
-
-          <FormSection
-            index="4"
             title="디자인 및 제작 일정"
             description="기업은 금액만큼 일정과 수정 가능 횟수를 중요하게 봅니다."
           >
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid items-end gap-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
               <Field label="1차 디자인 제공일" value={form.firstDesignDate} onChange={(value) => patch({ firstDesignDate: value })} type="date" />
-              <Field label="수정 가능 횟수" value={form.revisionCount} onChange={(value) => patch({ revisionCount: value })} type="number" />
-              <Field label="제작 소요일" value={form.productionDays} onChange={(value) => patch({ productionDays: value })} type="number" />
+              <div className="md:w-28">
+                <Field label="수정 가능 횟수" value={form.revisionCount} onChange={(value) => patch({ revisionCount: value })} type="number" />
+              </div>
               <Field label="견적 유효기간" value={form.validUntil} onChange={(value) => patch({ validUntil: value })} type="date" />
             </div>
           </FormSection>
 
           <FormSection
-            index="5"
+            index="4"
             title="제안 내용"
             description="견적 금액 외에 업체의 강점과 진행 방식을 설명해주세요."
           >
@@ -232,9 +221,7 @@ export function QuoteForm({ contractor, request, initialQuote }: QuoteFormProps)
           <dl className="mt-5 grid gap-3">
             <PreviewRow label="부스 유형" value={form.boothType || "입력 전"} />
             <PreviewRow label="상세 비용 합계" value={formatCurrency(costTotal)} />
-            {hasCostMismatch ? <PreviewRow label="총액 차이" value={formatCurrency(totalPriceValue - costTotal)} /> : null}
             <PreviewRow label="1차 디자인" value={form.firstDesignDate || "미정"} />
-            <PreviewRow label="제작 기간" value={form.productionDays ? `${form.productionDays}일` : "미정"} />
             <PreviewRow label="유효기간" value={form.validUntil || "미정"} />
           </dl>
         </section>
@@ -247,7 +234,6 @@ function getMissingRequired(form: QuoteFormData) {
   const missing: string[] = [];
   if (!form.boothType.trim()) missing.push("제안 부스 유형");
   if (numeric(form.totalPrice) <= 0) missing.push("총 견적 금액");
-  if (!form.includedItems.trim()) missing.push("포함 항목");
   if (!form.proposal.trim()) missing.push("제안 내용");
   if (!form.validUntil) missing.push("견적 유효기간");
   return missing;
@@ -284,23 +270,39 @@ function Field({
   label,
   value,
   onChange,
-  type = "text"
+  type = "text",
+  readOnly = false
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  readOnly?: boolean;
 }) {
   return (
     <label className="grid gap-2 text-sm font-black text-booth-ink">
       {label}
       <input
-        className="rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue"
+        className="w-full min-w-0 appearance-none rounded-xl border border-booth-line bg-slate-50 px-4 py-3 font-bold outline-none focus:border-booth-blue [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         onChange={(event) => onChange(event.target.value)}
+        onInput={(event) => onChange(event.currentTarget.value)}
+        readOnly={readOnly}
         type={type}
         value={value}
       />
     </label>
+  );
+}
+
+function ChoiceGrid({ values, selected, onToggle }: { values: string[]; selected: string[]; onToggle: (value: string) => void }) {
+  return (
+    <div className="mt-3 grid gap-3 md:grid-cols-2">
+      {values.map((value) => (
+        <button className={`rounded-2xl border p-5 text-left text-sm font-black transition ${selected.includes(value) ? "border-booth-blue bg-blue-50 text-booth-blue" : "border-booth-line bg-slate-50 text-booth-ink"}`} key={value} onClick={() => onToggle(value)} type="button">
+          {value}
+        </button>
+      ))}
+    </div>
   );
 }
 

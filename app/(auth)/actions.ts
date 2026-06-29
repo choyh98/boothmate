@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseEnv } from "@/lib/config/env";
 import { getDashboardPath, getRequiredRoleFromPath, isUserRole } from "@/lib/auth/routes";
@@ -84,7 +84,7 @@ export async function loginAction(
   }
 
   if (redirectTo) {
-    redirect(redirectTo);
+    redirect(redirectTo, RedirectType.replace);
   }
 
   return { ok: false, message: "로그인 처리 중 문제가 발생했습니다." };
@@ -164,19 +164,31 @@ export async function signupAction(
     };
   }
 
-  redirect(redirectTo);
+  redirect(redirectTo, RedirectType.replace);
 }
 
-export async function logoutAction() {
+export async function clearAuthSessionAction() {
   cookies().delete("boothmate_dev_role");
 
   const { url, anonKey } = getSupabaseEnv();
   if (url && anonKey) {
     const supabase = createSupabaseServerClient();
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      return { ok: false, message: "로그아웃 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요." };
+    }
   }
 
-  redirect("/login");
+  return { ok: true, message: "" };
+}
+
+export async function logoutAction() {
+  const result = await clearAuthSessionAction();
+  if (!result.ok) {
+    redirect("/login?error=logout", RedirectType.replace);
+  }
+
+  redirect("/", RedirectType.replace);
 }
 
 export async function devLoginAction(formData: FormData) {
@@ -197,5 +209,5 @@ export async function devLoginAction(formData: FormData) {
     maxAge: 60 * 60 * 8
   });
 
-  redirect(safeRedirectPathForRole(nextPath, role) ?? getDashboardPath(role));
+  redirect(safeRedirectPathForRole(nextPath, role) ?? getDashboardPath(role), RedirectType.replace);
 }

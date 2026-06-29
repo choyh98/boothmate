@@ -43,16 +43,8 @@ const rows: Array<{
   { group: "세부 비용", label: "그래픽 출력", getValue: (quote) => formatCurrency(quote.graphic_cost) },
   { group: "세부 비용", label: "집기", getValue: (quote) => formatCurrency(quote.furniture_cost) },
   { group: "세부 비용", label: "기타 비용", getValue: (quote) => formatCurrency(quote.other_cost) },
-  { group: "범위", label: "포함 항목", getValue: (quote) => quote.included_items ?? "미정" },
-  { group: "범위", label: "불포함 항목", getValue: (quote) => quote.excluded_items ?? "미정" },
   { group: "일정", label: "1차 디자인 제공일", getValue: (quote) => quote.first_design_date ?? "미정" },
   { group: "일정", label: "수정 가능 횟수", getValue: (quote) => quote.revision_count !== null ? `${quote.revision_count}회` : "미정" },
-  {
-    group: "일정",
-    label: "제작 기간",
-    getValue: (quote) => quote.production_days !== null ? `${quote.production_days}일` : "미정",
-    highlight: (quote, context) => quote.production_days && quote.production_days === context.fastestProductionDays ? "가장 빠름" : null
-  },
   {
     group: "유효성",
     label: "견적 유효기간",
@@ -69,7 +61,6 @@ const rows: Array<{
 
 type CompareContext = {
   lowestPrice: number | null;
-  fastestProductionDays: number | null;
 };
 
 function quoteIdsFromParam(value?: string) {
@@ -112,8 +103,7 @@ export default async function CompanyQuoteComparePage({ params, searchParams }: 
   }
 
   const compareContext: CompareContext = {
-    lowestPrice: minPositive(quotes.map((quote) => quote.total_price)),
-    fastestProductionDays: minPositive(quotes.map((quote) => quote.production_days))
+    lowestPrice: minPositive(quotes.map((quote) => quote.total_price))
   };
   const expiredCount = quotes.filter((quote) => isExpired(quote.valid_until)).length;
   const selectableCount = quotes.filter((quote) => !disabledReasonForQuote(request, quote)).length;
@@ -142,10 +132,9 @@ export default async function CompanyQuoteComparePage({ params, searchParams }: 
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-4">
+          <div className="mt-6 grid gap-3 md:grid-cols-3">
             <DecisionMetric label="비교 견적" value={`${quotes.length}개`} />
             <DecisionMetric label="최저 금액" value={formatCurrency(compareContext.lowestPrice)} />
-            <DecisionMetric label="가장 빠른 제작" value={compareContext.fastestProductionDays ? `${compareContext.fastestProductionDays}일` : "미정"} />
             <DecisionMetric label="선택 가능" value={`${selectableCount}개`} warning={expiredCount > 0 ? `만료 ${expiredCount}개` : undefined} />
           </div>
         </section>

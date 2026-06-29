@@ -1,5 +1,10 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentCompany } from "@/lib/auth/get-current-user";
+import {
+  isDevQuoteRequestOwner,
+  getDevQuoteRequest,
+  listDevQuoteRequests
+} from "@/lib/quote-requests/dev-store";
 import type { QuoteRequest } from "@/types/quote-request";
 
 export async function getCompanyOrThrow(ownerId: string) {
@@ -7,7 +12,7 @@ export async function getCompanyOrThrow(ownerId: string) {
   if (!company) {
     throw new Error("회사 정보를 찾을 수 없습니다. 참여기업 계정으로 다시 로그인해주세요.");
   }
-  if (ownerId.startsWith("dev-")) {
+  if (ownerId.startsWith("dev-") && !isDevQuoteRequestOwner(ownerId)) {
     throw new Error("개발용 빠른 입장 계정은 실제 저장을 할 수 없습니다. Supabase 계정으로 로그인해주세요.");
   }
   return company;
@@ -15,6 +20,10 @@ export async function getCompanyOrThrow(ownerId: string) {
 
 export async function listMyQuoteRequests(ownerId: string) {
   const company = await getCompanyOrThrow(ownerId);
+  if (isDevQuoteRequestOwner(ownerId)) {
+    return listDevQuoteRequests(company.id);
+  }
+
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("quote_requests")
@@ -33,6 +42,10 @@ export async function listMyQuoteRequests(ownerId: string) {
 
 export async function getMyQuoteRequest(ownerId: string, id: string) {
   const company = await getCompanyOrThrow(ownerId);
+  if (isDevQuoteRequestOwner(ownerId)) {
+    return getDevQuoteRequest(company.id, id);
+  }
+
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("quote_requests")

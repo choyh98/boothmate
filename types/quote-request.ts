@@ -33,7 +33,10 @@ export type QuoteRequest = {
   selected_at?: string | null;
   created_at: string;
   updated_at: string;
-  exhibitions?: Pick<Exhibition, "id" | "title" | "venue" | "venue_group" | "start_date" | "end_date" | "industry"> | null;
+  exhibitions?: Pick<
+    Exhibition,
+    "id" | "title" | "venue" | "venue_group" | "region" | "start_date" | "end_date" | "industry" | "status"
+  > | null;
 };
 
 export type QuoteRequestFormData = {
@@ -50,6 +53,8 @@ export type QuoteRequestFormData = {
   budgetMax: string;
   vatIncluded: boolean;
   requiredItems: RequiredItems;
+  floorColor: string;
+  floorColorOther: string;
   designStyles: string[];
   requirements: string;
   deadlineHours: string;

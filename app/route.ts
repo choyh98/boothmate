@@ -53,35 +53,62 @@ const calendarStyles = `
 `;
 
 const processStyles = `
-.workflow-section{padding-top:clamp(70px,8vw,104px);background:#f8fafc}
-.workflow-showcase{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,1.2fr);gap:clamp(28px,5vw,72px);align-items:start;max-width:1100px;margin:0 auto}
-.workflow-copy{position:sticky;top:110px}
-.workflow-label{display:inline-flex;align-items:center;gap:8px;border:1px solid #dbe4f0;border-radius:999px;background:white;padding:8px 12px;color:#0056ff;font-family:"Inter",sans-serif;font-size:12px;font-weight:900;letter-spacing:0}
+.workflow-section{position:relative;min-height:190vh;padding-top:0;background:#f8fafc}
+.workflow-showcase{position:sticky;top:96px;display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,1.2fr);gap:clamp(28px,5vw,72px);align-items:center;max-width:1100px;min-height:calc(100vh - 112px);margin:0 auto;padding-block:clamp(42px,6vw,72px)}
+.workflow-copy{position:relative}
+.workflow-label{display:inline-flex;align-items:center;gap:8px;border:1px solid #dbe4f0;border-radius:999px;background:white;padding:8px 12px;color:#0056ff;font-family:"Inter",sans-serif;font-size:12px;font-weight:900;letter-spacing:0;opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
 .workflow-copy h2{max-width:480px;margin:18px 0 0;color:#0f172a;font-size:clamp(36px,5vw,58px);line-height:1.04;font-weight:900;letter-spacing:0}
+.workflow-title-line{display:block;width:fit-content;opacity:0;filter:blur(7px);transition:opacity .72s cubic-bezier(.2,.78,.15,1),transform .72s cubic-bezier(.2,.78,.15,1),filter .72s ease}
+.workflow-title-line:nth-child(1){transform:translateX(-36px);transition-delay:.08s}
+.workflow-title-line:nth-child(2){margin-top:4px;color:#0056ff;transform:translateX(36px);transition-delay:.2s}
 .workflow-copy p{max-width:430px;margin:18px 0 0;color:#64748b;font-size:16px;line-height:1.75;font-weight:750}
+.workflow-copy-fragment{display:inline;opacity:0;filter:blur(5px);transform:translateY(12px);transition:opacity .55s ease,transform .55s ease,filter .55s ease}
+.workflow-copy-fragment:nth-child(1){transition-delay:.32s}
+.workflow-copy-fragment:nth-child(2){transition-delay:.42s}
+.workflow-copy-fragment:nth-child(3){transition-delay:.52s}
 .workflow-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.workflow-actions{opacity:0;transform:translateY(18px);transition:opacity .62s ease .24s,transform .62s ease .24s}
 .workflow-primary,.workflow-secondary{display:inline-flex;min-height:46px;align-items:center;justify-content:center;border-radius:10px;padding:0 18px;font-size:14px;font-weight:900;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,color .2s ease,background .2s ease}
 .workflow-primary{background:#0056ff;color:white;box-shadow:0 14px 28px rgba(0,86,255,.22)}
 .workflow-primary:hover{background:#0046d8;box-shadow:0 18px 34px rgba(0,86,255,.28);transform:translateY(-2px)}
 .workflow-secondary{border:1px solid #dbe4f0;background:white;color:#0f172a}
 .workflow-secondary:hover{border-color:#b8ccff;color:#0056ff;box-shadow:0 12px 24px rgba(15,23,42,.08);transform:translateY(-2px)}
-.workflow-board{display:grid;gap:14px}
-.workflow-card{position:relative;display:grid;grid-template-columns:72px minmax(0,1fr);gap:18px;align-items:start;border:1px solid #dbe4f0;border-radius:18px;background:white;padding:22px;box-shadow:0 16px 34px rgba(15,23,42,.07);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
-.workflow-card:hover{border-color:rgba(0,86,255,.26);box-shadow:0 22px 44px rgba(0,86,255,.12);transform:translateY(-3px)}
-.workflow-number{display:grid;width:58px;height:58px;place-items:center;border-radius:16px;background:linear-gradient(145deg,#0056ff,#43c7ff);color:white;font-family:"Inter",sans-serif;font-size:20px;font-weight:900;box-shadow:0 14px 28px rgba(0,86,255,.22)}
-.workflow-card h3{margin:0;color:#0f172a;font-size:20px;line-height:1.25;font-weight:900}
-.workflow-card p{margin:8px 0 0;color:#64748b;font-size:14px;line-height:1.65;font-weight:750}
-.workflow-result{display:inline-flex;width:fit-content;margin-top:14px;border-radius:999px;background:#eef4ff;padding:7px 10px;color:#0056ff;font-size:12px;font-weight:900}
-@media (max-width: 900px){.workflow-showcase{grid-template-columns:1fr}.workflow-copy{position:static}.workflow-copy h2{max-width:none}.workflow-copy p{max-width:none}}
+.workflow-board{position:relative;height:min(560px,calc(100vh - 180px));min-height:480px;border:1px solid #dbe4f0;border-radius:30px;background:linear-gradient(145deg,#ffffff 0%,#f6f9ff 58%,#eef5ff 100%);box-shadow:0 28px 70px rgba(15,23,42,.12);overflow:hidden}
+.workflow-board::before{position:absolute;inset:0;background-image:linear-gradient(rgba(0,86,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,86,255,.06) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(180deg,rgba(0,0,0,.82),rgba(0,0,0,.14));content:""}
+.workflow-card{position:absolute;left:34px;right:34px;top:50%;display:grid;grid-template-columns:76px minmax(0,1fr);gap:20px;align-items:start;border:1px solid rgba(219,228,240,.92);border-radius:24px;background:rgba(255,255,255,.92);padding:26px;box-shadow:0 18px 42px rgba(15,23,42,.11);opacity:0;transform:translate3d(0,-50%,0) scale(.78);transform-origin:center;transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;will-change:opacity,transform;backdrop-filter:blur(18px)}
+.workflow-card:nth-child(1){transition-delay:.06s}
+.workflow-card:nth-child(2){transition-delay:.14s}
+.workflow-card:nth-child(3){transition-delay:.22s}
+.workflow-card:nth-child(4){transition-delay:.3s}
+.workflow-card.is-active{border-color:rgba(0,86,255,.34);background:white;box-shadow:0 34px 76px rgba(0,86,255,.18)}
+.workflow-number{position:relative;z-index:1;display:grid;width:64px;height:64px;place-items:center;border-radius:20px;background:linear-gradient(145deg,#0056ff,#43c7ff);color:white;font-family:"Inter",sans-serif;font-size:22px;font-weight:900;box-shadow:0 18px 34px rgba(0,86,255,.26)}
+.workflow-number::after{position:absolute;inset:-9px;border:1px solid rgba(0,86,255,.24);border-radius:28px;opacity:0;transform:scale(.82);transition:opacity .2s ease,transform .2s ease;content:""}
+.workflow-card.is-active .workflow-number::after{opacity:.44;transform:scale(1)}
+.workflow-card h3{margin:0;color:#0f172a;font-size:23px;line-height:1.2;font-weight:900}
+.workflow-card p{margin:10px 0 0;color:#64748b;font-size:15px;line-height:1.7;font-weight:750}
+.workflow-result{display:inline-flex;width:fit-content;margin-top:16px;border-radius:999px;background:#eef4ff;padding:8px 11px;color:#0056ff;font-size:12px;font-weight:900}
+.workflow-card.is-active .workflow-result{background:#0056ff;color:white}
+.workflow-showcase.is-visible .workflow-label,.workflow-showcase.is-visible .workflow-actions,.workflow-showcase.is-visible .workflow-card{opacity:1;transform:translateY(0) scale(1)}
+.workflow-showcase.is-visible .workflow-title-line{opacity:1;filter:blur(0);transform:translateX(0)}
+.workflow-showcase.is-visible .workflow-copy-fragment{opacity:1;filter:blur(0);transform:translateY(0)}
+@media (prefers-reduced-motion: reduce){.workflow-label,.workflow-title-line,.workflow-copy-fragment,.workflow-actions,.workflow-card{opacity:1!important;filter:none!important;transform:none!important;transition:none!important}}
+@media (max-width: 900px){.workflow-section{min-height:auto;padding-top:clamp(70px,8vw,104px)}.workflow-showcase{position:relative;top:auto;grid-template-columns:1fr;min-height:auto;padding-block:0}.workflow-copy{position:static}.workflow-copy h2{max-width:none}.workflow-copy p{max-width:none}.workflow-board{height:auto;min-height:0;display:grid;gap:14px;border:0;background:transparent;box-shadow:none;overflow:visible}.workflow-board::before,.workflow-board::after{display:none}.workflow-card{position:relative;left:auto;right:auto;top:auto;opacity:1;transform:none}}
 @media (max-width: 620px){.workflow-card{grid-template-columns:1fr;padding:20px}.workflow-number{width:48px;height:48px;border-radius:14px}.workflow-actions{display:grid}.workflow-primary,.workflow-secondary{width:100%}}
 `;
 
 const processSection = `<section class="section workflow-section" id="guide">
-      <div class="workflow-showcase">
+      <div class="workflow-showcase" data-workflow-showcase>
         <div class="workflow-copy">
           <span class="workflow-label">HOW IT WORKS</span>
-          <h2>전시 부스 준비, 흐름만 잡으면 훨씬 쉬워집니다.</h2>
-          <p>전시 일정 선택부터 요청서 작성, 견적 비교, 업체 선정까지 참여기업이 실제로 진행하는 순서에 맞춰 정리했습니다.</p>
+          <h2>
+            <span class="workflow-title-line">전시 부스 준비,</span>
+            <span class="workflow-title-line">흐름만 잡으면 쉬워집니다.</span>
+          </h2>
+          <p>
+            <span class="workflow-copy-fragment">전시 일정 선택부터 </span>
+            <span class="workflow-copy-fragment">요청서 작성, 견적 비교, 업체 선정까지 </span>
+            <span class="workflow-copy-fragment">참여기업이 실제로 진행하는 순서에 맞춰 정리했습니다.</span>
+          </p>
           <div class="workflow-actions">
             <a class="workflow-primary" href="/company/quote-requests/new">견적 요청 시작</a>
             <a class="workflow-secondary" href="/exhibitions">전시 일정 보기</a>
@@ -123,6 +150,117 @@ const processSection = `<section class="section workflow-section" id="guide">
         </div>
       </div>
     </section>`;
+
+const processScript = `
+<script>
+(() => {
+  const workflow = document.querySelector("[data-workflow-showcase]");
+  if (!workflow) return;
+
+  const cards = Array.from(workflow.querySelectorAll(".workflow-card"));
+  const section = workflow.closest(".workflow-section") || workflow;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const simpleLayout = window.matchMedia("(max-width: 900px)").matches;
+  let ticking = false;
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function hasClass(element, className) {
+    return (" " + String(element.className || "") + " ").includes(" " + className + " ");
+  }
+
+  function addClass(element, className) {
+    if (!hasClass(element, className)) {
+      element.className = (String(element.className || "") + " " + className).trim();
+    }
+  }
+
+  function toggleClass(element, className, enabled) {
+    const current = String(element.className || "")
+      .split(/\\s+/)
+      .filter(Boolean)
+      .filter((name) => name !== className);
+    if (enabled) current.push(className);
+    element.className = current.join(" ");
+  }
+
+  function setActive(index) {
+    cards.forEach((card, cardIndex) => {
+      toggleClass(card, "is-active", cardIndex === index);
+    });
+  }
+
+  function updateByScroll() {
+    ticking = false;
+
+    if (!cards.length) return;
+
+    const rect = section.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
+    const scrollableDistance = Math.max(1, rect.height - viewportHeight);
+    const rawProgress = clamp(-rect.top / scrollableDistance, 0, 1);
+    const progress = rawProgress < 0.04 ? 0 : rawProgress;
+
+    if (progress > 0.01 || rect.top < viewportHeight * 0.72) {
+      addClass(workflow, "is-visible");
+    }
+
+    const activePosition = progress * (cards.length - 1);
+    const activeIndex = clamp(Math.round(activePosition), 0, cards.length - 1);
+    addClass(workflow, "is-visible");
+    setActive(activeIndex);
+
+    cards.forEach((card, index) => {
+      const signedDistance = index - activePosition;
+      const distance = Math.abs(signedDistance);
+      const focus = clamp(1 - distance / 1.05, 0, 1);
+      const opacity = distance > 2.05 ? 0 : 0.18 + focus * 0.82;
+      const y = signedDistance * 168;
+      const x = signedDistance * 34;
+      const scale = 0.64 + focus * 0.44;
+      const rotate = signedDistance * -4.8;
+
+      card.style.opacity = String(opacity);
+      card.style.zIndex = String(100 - Math.round(distance * 10));
+      card.style.transform =
+        "translate3d(" +
+        x.toFixed(2) +
+        "px, " +
+        y.toFixed(2) +
+        "px, 0) translateY(-50%) scale(" +
+        scale.toFixed(3) +
+        ") rotate(" +
+        rotate.toFixed(2) +
+        "deg)";
+    });
+  }
+
+  function requestUpdate() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(updateByScroll);
+  }
+
+  if (reducedMotion || simpleLayout) {
+    addClass(workflow, "is-visible");
+    cards.forEach((card) => {
+      card.style.opacity = "1";
+      card.style.transform = "none";
+      card.style.zIndex = "";
+    });
+    setActive(0);
+  } else {
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    window.addEventListener("load", requestUpdate, { once: true });
+    requestUpdate();
+    window.setTimeout(requestUpdate, 80);
+  }
+})();
+</script>
+`;
 
 const calendarScript = `
 <script>
@@ -363,9 +501,9 @@ function rewriteLegacyHtml(html: string, calendarSection: string) {
   );
   rewritten = rewritten.replace(
     "</style>",
-    `${calendarStyles}${processStyles}.nav-links{display:none!important}.nav{grid-template-columns:auto auto}.nav-actions{margin-left:auto}</style>`
+    `${calendarStyles}${processStyles}.page{overflow:visible!important}.nav-links{display:none!important}.nav{grid-template-columns:auto auto}.nav-actions{margin-left:auto}</style>`
   );
-  rewritten = rewritten.replace("</body>", `${calendarScript}</body>`);
+  rewritten = rewritten.replace("</body>", `${processScript}${calendarScript}</body>`);
 
   return rewritten;
 }

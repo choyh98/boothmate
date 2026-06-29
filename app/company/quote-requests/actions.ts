@@ -5,6 +5,10 @@ import { getCurrentUserContext } from "@/lib/auth/get-current-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCompanyOrThrow } from "@/lib/quote-requests/queries";
 import {
+  isDevQuoteRequestOwner,
+  upsertDevQuoteRequest
+} from "@/lib/quote-requests/dev-store";
+import {
   cleanRequiredItems,
   parseNumber,
   validateQuoteRequestForm
@@ -24,6 +28,24 @@ function deadlineFromHours(hours: string) {
   return new Date(Date.now() + safeHours * 60 * 60 * 1000).toISOString();
 }
 
+function requirementsWithFloorColor(input: QuoteRequestFormData) {
+  const requirements = input.requirements.trim();
+  if (!input.floorColor) return requirements || null;
+
+  const floorColorValue =
+    input.floorColor === "기타" && input.floorColorOther.trim()
+      ? `기타 (${input.floorColorOther.trim()})`
+      : input.floorColor;
+  const floorColorLine = `바닥색: ${floorColorValue}`;
+  const withoutPreviousFloorColor = requirements
+    .split("\n")
+    .filter((line) => !line.trim().startsWith("바닥색:"))
+    .join("\n")
+    .trim();
+
+  return withoutPreviousFloorColor ? `${withoutPreviousFloorColor}\n${floorColorLine}` : floorColorLine;
+}
+
 export async function saveQuoteRequestAction(
   input: QuoteRequestFormData,
   intent: "draft" | "submit"
@@ -40,7 +62,6 @@ export async function saveQuoteRequestAction(
 
   try {
     const company = await getCompanyOrThrow(context.userId);
-    const supabase = createSupabaseServerClient();
     const status: QuoteRequestStatus = intent === "submit" ? "open" : "draft";
     const payload = {
       company_id: company.id,
@@ -57,10 +78,22 @@ export async function saveQuoteRequestAction(
       vat_included: input.vatIncluded,
       required_items: cleanRequiredItems(input.requiredItems),
       design_styles: input.designStyles,
-      requirements: input.requirements.trim() || null,
+      requirements: requirementsWithFloorColor(input),
       deadline: intent === "submit" ? deadlineFromHours(input.deadlineHours) : null,
       status
     };
+
+    if (isDevQuoteRequestOwner(context.userId)) {
+      const data = await upsertDevQuoteRequest({ id: input.id, payload });
+      return {
+        ok: true,
+        message: status === "draft" ? "임시저장했습니다." : "견적 요청을 제출했습니다.",
+        id: data.id,
+        status: data.status
+      };
+    }
+
+    const supabase = createSupabaseServerClient();
 
     if (input.id) {
       const { data: existing, error: existingError } = await supabase

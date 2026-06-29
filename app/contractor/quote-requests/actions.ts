@@ -8,6 +8,7 @@ import {
   getOpenQuoteRequest,
   isRequestOpenForQuotes
 } from "@/lib/quotes/queries";
+import { isDevQuoteRequestId, upsertDevQuote } from "@/lib/quotes/dev-store";
 import {
   normalizeDate,
   parseMoney,
@@ -29,10 +30,23 @@ function trimOrNull(value: string) {
 }
 
 function quotePayload(input: QuoteFormData, status: QuoteStatus, submittedAt: string | null) {
+  const costTotal = [
+    input.designCost,
+    input.materialCost,
+    input.constructionCost,
+    input.transportCost,
+    input.installationCost,
+    input.dismantlingCost,
+    input.electricalCost,
+    input.graphicCost,
+    input.furnitureCost,
+    input.otherCost
+  ].reduce((sum, value) => sum + (parseMoney(value) ?? 0), 0);
+
   return {
     quote_request_id: input.quoteRequestId,
     booth_type: trimOrNull(input.boothType),
-    total_price: parseMoney(input.totalPrice),
+    total_price: costTotal > 0 ? costTotal : parseMoney(input.totalPrice),
     vat_included: input.vatIncluded,
     design_cost: parseMoney(input.designCost),
     material_cost: parseMoney(input.materialCost),
@@ -82,6 +96,23 @@ export async function saveQuoteAction(
       return { ok: false, message: "현재 구독 상태에서는 견적을 제출할 수 없습니다." };
     }
 
+    const status: QuoteStatus = intent === "submit" ? "submitted" : "draft";
+    const submittedAt = intent === "submit" ? new Date().toISOString() : null;
+    const payload = {
+      ...quotePayload(input, status, submittedAt),
+      contractor_id: contractor.id
+    };
+
+    if (isDevQuoteRequestId(input.quoteRequestId)) {
+      const data = await upsertDevQuote({ payload });
+      return {
+        ok: true,
+        message: status === "draft" ? "견적을 임시저장했습니다." : "견적을 최종 제출했습니다.",
+        id: data.id,
+        status: data.status
+      };
+    }
+
     const supabase = createSupabaseServerClient();
     const { data: existing, error: existingError } = await supabase
       .from("quotes")
@@ -91,13 +122,6 @@ export async function saveQuoteAction(
       .maybeSingle();
 
     if (existingError) throw existingError;
-
-    const status: QuoteStatus = intent === "submit" ? "submitted" : "draft";
-    const submittedAt = intent === "submit" ? new Date().toISOString() : null;
-    const payload = {
-      ...quotePayload(input, status, submittedAt),
-      contractor_id: contractor.id
-    };
 
     if (existing) {
       if (existing.status !== "draft") {

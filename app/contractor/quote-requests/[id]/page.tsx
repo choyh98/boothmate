@@ -66,13 +66,18 @@ export default async function ContractorQuoteRequestDetailPage({ params }: { par
             </p>
             {submittedQuoteId ? (
               <Link className="mt-5 block rounded-xl bg-booth-blue px-5 py-4 text-center text-sm font-black text-white" href={`/contractor/quotes/${submittedQuoteId}`}>
-                제출 견적 확인
+                제출한 견적 보기
               </Link>
             ) : (
               <Link className="mt-5 block rounded-xl bg-booth-blue px-5 py-4 text-center text-sm font-black text-white" href={`/contractor/quote-requests/${request.id}/quote`}>
-                {quote ? "이어서 작성" : "견적 작성"}
+                {quote ? "작성 중인 견적 계속하기" : "견적 작성하기"}
               </Link>
             )}
+            {quote?.status === "draft" ? (
+              <p className="mt-3 rounded-2xl bg-blue-50 p-4 text-sm font-bold leading-6 text-blue-800">
+                임시저장된 내용은 견적 작성 화면에서 자동으로 불러옵니다.
+              </p>
+            ) : null}
             <Link className="mt-3 block rounded-xl border border-booth-line px-5 py-4 text-center text-sm font-black text-booth-ink" href="/contractor/quote-requests">
               목록으로
             </Link>

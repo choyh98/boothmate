@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUserContext } from "@/lib/auth/get-current-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCompanyQuote } from "@/lib/company-quotes/queries";
+import { isDevQuoteRequestOwner } from "@/lib/quote-requests/dev-store";
+import { getCompanyOrThrow } from "@/lib/quote-requests/queries";
+import {
+  markDevCompanyQuoteViewed,
+  selectDevCompanyQuote
+} from "@/lib/quotes/dev-store";
 
 export type SelectQuoteResult = {
   ok: boolean;
@@ -19,6 +25,12 @@ export async function markQuoteViewedAction(quoteId: string) {
   }
 
   try {
+    if (isDevQuoteRequestOwner(context.userId)) {
+      const company = await getCompanyOrThrow(context.userId);
+      await markDevCompanyQuoteViewed(company.id, quoteId);
+      return { ok: true, message: "견적을 열람했습니다." };
+    }
+
     const supabase = createSupabaseServerClient();
     const { error } = await supabase.rpc("mark_quote_viewed", {
       target_quote_id: quoteId
@@ -45,6 +57,23 @@ export async function selectQuoteAction(
 
   try {
     await getCompanyQuote(context.userId, quoteId);
+
+    if (isDevQuoteRequestOwner(context.userId)) {
+      const company = await getCompanyOrThrow(context.userId);
+      await selectDevCompanyQuote(company.id, quoteRequestId, quoteId);
+
+      revalidatePath(`/company/quote-requests/${quoteRequestId}`);
+      revalidatePath(`/company/quote-requests/${quoteRequestId}/quotes`);
+      revalidatePath(`/company/quote-requests/${quoteRequestId}/compare`);
+      revalidatePath(`/company/quotes/${quoteId}`);
+
+      return {
+        ok: true,
+        message: "최종 업체를 선택했습니다.",
+        quoteId,
+        quoteRequestId
+      };
+    }
 
     const supabase = createSupabaseServerClient();
     const { error } = await supabase.rpc("select_quote_for_request", {

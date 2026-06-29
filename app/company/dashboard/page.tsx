@@ -4,7 +4,9 @@ import { EmptyState, ErrorState, StatusBadge } from "@/components/ui/state";
 import { getCurrentCompany } from "@/lib/auth/get-current-user";
 import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency, formatDate, formatDateRange } from "@/lib/format";
+import { listCompanyQuotesForRequest } from "@/lib/company-quotes/queries";
 import { listMyQuoteRequests } from "@/lib/quote-requests/queries";
+import type { Quote } from "@/types/quote";
 import type { QuoteRequest } from "@/types/quote-request";
 
 export const dynamic = "force-dynamic";
@@ -13,23 +15,46 @@ export default async function CompanyDashboardPage() {
   const context = await requireRole("company");
   const company = await getCurrentCompany(context.userId);
   let requests: QuoteRequest[] = [];
+  let receivedQuotes: Quote[] = [];
   let errorMessage = "";
 
   try {
     requests = await listMyQuoteRequests(context.userId);
+    const quoteGroups = await Promise.all(
+      requests.map(async (request) => {
+        try {
+          return listCompanyQuotesForRequest(context.userId, request.id);
+        } catch {
+          return [];
+        }
+      })
+    );
+    receivedQuotes = quoteGroups.flat();
   } catch (error) {
     if (!context.userId.startsWith("dev-")) {
       errorMessage = error instanceof Error ? error.message : "견적 요청 현황을 불러오지 못했습니다.";
     }
   }
 
+  const openRequestIds = new Set(requests.filter((request) => request.status === "open").map((request) => request.id));
+  const activeReceivedQuotes = receivedQuotes.filter((quote) => openRequestIds.has(quote.quote_request_id));
+  const selectedQuotes = receivedQuotes.filter((quote) => quote.status === "selected");
+  const quoteCountByRequest = new Map<string, number>();
+  for (const quote of receivedQuotes) {
+    quoteCountByRequest.set(quote.quote_request_id, (quoteCountByRequest.get(quote.quote_request_id) ?? 0) + 1);
+  }
+
   const stats = [
     { label: "전체 요청", value: requests.length },
     { label: "공개 요청", value: requests.filter((request) => request.status === "open").length },
-    { label: "임시저장", value: requests.filter((request) => request.status === "draft").length },
+    { label: "받은 견적", value: receivedQuotes.length },
     { label: "선택 완료", value: requests.filter((request) => request.status === "selected").length }
   ];
   const recentRequests = requests.slice(0, 4);
+  const recentQuotes = receivedQuotes
+    .slice()
+    .sort((a, b) => Date.parse(b.submitted_at ?? b.updated_at) - Date.parse(a.submitted_at ?? a.updated_at))
+    .slice(0, 3);
   const nextDeadline = requests
     .filter((request) => request.deadline && ["open", "reviewing"].includes(request.status))
     .sort((a, b) => new Date(a.deadline ?? 0).getTime() - new Date(b.deadline ?? 0).getTime())[0];
@@ -57,11 +82,14 @@ export default async function CompanyDashboardPage() {
           </div>
 
           <aside className="rounded-[28px] border border-slate-900/10 bg-slate-950 p-6 text-white shadow-soft">
-            <p className="text-sm font-black text-blue-300">오늘 확인할 일</p>
-            <h2 className="mt-4 text-2xl font-black">오늘 확인할 일</h2>
+            <p className="text-sm font-black text-blue-300">받은 견적 확인</p>
+            <h2 className="mt-4 text-2xl font-black">비교가 필요한 견적 {activeReceivedQuotes.length}건</h2>
+            <p className="mt-3 text-sm font-bold leading-6 text-slate-300">
+              제출된 견적은 목록, 비교표, 상세 화면에서 바로 확인하고 최종 업체를 선택할 수 있습니다.
+            </p>
             <div className="mt-6 grid gap-3">
-              <ActionLine label="요청서 임시저장" value={`${stats[2].value}건`} href="/company/quote-requests" />
-              <ActionLine label="견적 모집 중" value={`${stats[1].value}건`} href="/company/quote-requests" />
+              <ActionLine label="새로 받은 견적" value={`${activeReceivedQuotes.length}건`} href={recentQuotes[0]?.quote_requests ? `/company/quote-requests/${recentQuotes[0].quote_request_id}/quotes` : "/company/quote-requests"} />
+              <ActionLine label="선택 완료 견적" value={`${selectedQuotes.length}건`} href="/company/quote-requests" />
               <ActionLine label="마감 임박" value={nextDeadline ? formatDate(nextDeadline.deadline) : "없음"} href="/company/quote-requests" />
             </div>
           </aside>
@@ -82,7 +110,7 @@ export default async function CompanyDashboardPage() {
           ))}
         </section>
 
-        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="rounded-[28px] border border-white/80 bg-white p-6 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -122,6 +150,9 @@ export default async function CompanyDashboardPage() {
                       <div className="text-right text-sm font-black text-booth-muted">
                         <p>{request.booth_count ?? "-"}부스</p>
                         <p>{formatCurrency(request.budget_max)}</p>
+                        <p className="mt-2 rounded-full bg-white px-3 py-1 text-xs text-booth-blue ring-1 ring-blue-100">
+                          받은 견적 {quoteCountByRequest.get(request.id) ?? 0}건
+                        </p>
                       </div>
                     </div>
                   </Link>
@@ -131,6 +162,39 @@ export default async function CompanyDashboardPage() {
           </div>
 
           <aside className="grid gap-4">
+            <div className="rounded-[24px] border border-white/80 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-black text-booth-ink">최근 받은 견적</h3>
+                  <p className="mt-2 text-sm font-bold text-booth-muted">제출된 견적을 바로 비교하고 선택하세요.</p>
+                </div>
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-booth-blue">
+                  {receivedQuotes.length}건
+                </span>
+              </div>
+              {recentQuotes.length === 0 ? (
+                <p className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm font-bold leading-6 text-booth-muted">
+                  아직 받은 견적이 없습니다. 요청이 공개되면 시공사가 제출한 견적이 여기에 표시됩니다.
+                </p>
+              ) : (
+                <div className="mt-5 grid gap-3">
+                  {recentQuotes.map((quote) => (
+                    <Link className="rounded-2xl border border-booth-line bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-blue-200" href={`/company/quotes/${quote.id}`} key={quote.id}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-black text-booth-ink">{quote.contractor_profile?.company_name ?? "업체 정보 없음"}</p>
+                          <p className="mt-1 text-xs font-bold text-booth-muted">{quote.booth_type ?? "부스 유형 미정"}</p>
+                        </div>
+                        <p className="text-sm font-black text-booth-blue">{formatCurrency(quote.total_price)}</p>
+                      </div>
+                      <p className="mt-3 text-xs font-bold text-booth-muted line-clamp-1">
+                        {quote.quote_requests?.title ?? "견적 요청"}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             <NextCard
               title="전시 일정"
               body="참가 전시회를 고르면 1단계가 자동 완료됩니다."

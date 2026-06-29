@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { QuoteForm } from "@/components/quotes/quote-form";
 import { requireRole } from "@/lib/auth/require-role";
@@ -25,6 +25,10 @@ export default async function ContractorQuoteWritePage({ params }: { params: { i
     quote = await getMyQuoteForRequest(context.userId, params.id);
   } catch {
     notFound();
+  }
+
+  if (quote && quote.status !== "draft") {
+    redirect(`/contractor/quotes/${quote.id}`);
   }
 
   return (

@@ -80,12 +80,9 @@ export function validateQuoteForm(input: QuoteFormData, submit: boolean) {
   if (!input.totalPrice.trim()) return "총 견적 금액을 입력해주세요.";
   if (parseMoney(input.totalPrice) === null) return "총 견적 금액을 올바르게 입력해주세요.";
   if (!input.proposal.trim()) return "제안 내용을 입력해주세요.";
-  if (!input.includedItems.trim()) return "포함 항목을 입력해주세요.";
   if (!input.firstDesignDate) return "1차 디자인 제공일을 선택해주세요.";
   if (!input.revisionCount.trim()) return "수정 가능 횟수를 입력해주세요.";
   if (parsePositiveInteger(input.revisionCount) === null) return "수정 가능 횟수를 올바르게 입력해주세요.";
-  if (!input.productionDays.trim()) return "제작 소요일을 입력해주세요.";
-  if (parsePositiveInteger(input.productionDays) === null) return "제작 소요일을 올바르게 입력해주세요.";
   if (!input.validUntil) return "견적 유효기간을 선택해주세요.";
 
   return null;

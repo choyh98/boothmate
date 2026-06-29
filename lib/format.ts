@@ -48,6 +48,8 @@ export function statusLabel(status: string) {
     draft: "작성 중",
     expired: "만료",
     inactive: "이용 중지",
+    ended: "종료",
+    ongoing: "진행 중",
     open: "견적 모집 중",
     pending: "검토 대기",
     rejected: "미선정",
@@ -57,6 +59,7 @@ export function statusLabel(status: string) {
     shortlisted: "후보 선정",
     suspended: "이용 제한",
     trial: "체험 중",
+    upcoming: "예정",
     viewed: "기업 열람",
     withdrawn: "철회"
   };
@@ -65,13 +68,13 @@ export function statusLabel(status: string) {
 }
 
 export function statusTone(status: string) {
-  if (["approved", "active", "open", "selected", "trial"].includes(status)) {
+  if (["approved", "active", "open", "selected", "trial", "upcoming", "ongoing"].includes(status)) {
     return "bg-emerald-50 text-emerald-700 ring-emerald-200";
   }
   if (["rejected", "expired", "suspended", "cancelled", "withdrawn"].includes(status)) {
     return "bg-red-50 text-red-700 ring-red-200";
   }
-  if (["inactive", "draft", "closed"].includes(status)) {
+  if (["inactive", "draft", "closed", "ended"].includes(status)) {
     return "bg-slate-100 text-slate-600 ring-slate-200";
   }
   if (["pending", "reviewing", "submitted", "viewed", "shortlisted"].includes(status)) {

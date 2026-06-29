@@ -1,5 +1,19 @@
 import { getCurrentContractor } from "@/lib/auth/get-current-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  getDevOpenQuoteRequest,
+  isDevQuoteRequestStoreEnabled,
+  listDevOpenQuoteRequests
+} from "@/lib/quote-requests/dev-store";
+import {
+  getDevQuote,
+  getDevQuoteForRequest,
+  isDevQuoteId,
+  isDevQuoteRequestId,
+  isDevQuoteStoreOwner,
+  listDevQuotes,
+  listDevSubmittedQuotes
+} from "@/lib/quotes/dev-store";
 import type { Contractor } from "@/types/auth";
 import type { Quote } from "@/types/quote";
 import type { QuoteRequest } from "@/types/quote-request";
@@ -8,7 +22,7 @@ const quoteRequestSelect = `
   id,company_id,exhibition_id,title,booth_count,booth_width,booth_depth,booth_area,open_sides,
   booth_types,budget_min,budget_max,vat_included,required_items,design_styles,requirements,
   deadline,status,selected_quote_id,selected_at,created_at,updated_at,
-  exhibitions(id,title,venue,venue_group,start_date,end_date,industry)
+  exhibitions(id,title,venue,venue_group,region,start_date,end_date,industry,status)
 `;
 
 const quoteSelect = `
@@ -50,10 +64,18 @@ export async function listOpenQuoteRequests() {
     .order("deadline", { ascending: true, nullsFirst: false });
 
   if (error) throw error;
-  return (data ?? []) as unknown as QuoteRequest[];
+  const supabaseRequests = ((data ?? []) as unknown as QuoteRequest[]).filter(
+    (request) => request.exhibitions?.status !== "cancelled"
+  );
+  const devRequests = await listDevOpenQuoteRequests();
+  return [...supabaseRequests, ...devRequests.filter((request) => request.exhibitions?.status !== "cancelled")];
 }
 
 export async function getOpenQuoteRequest(id: string) {
+  if (isDevQuoteRequestStoreEnabled() && id.startsWith("dev-quote-request-")) {
+    return getDevOpenQuoteRequest(id);
+  }
+
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("quote_requests")
@@ -69,6 +91,10 @@ export async function getOpenQuoteRequest(id: string) {
 
 export async function getMyQuoteForRequest(ownerId: string, quoteRequestId: string) {
   const contractor = await getContractorOrThrow(ownerId);
+  if (isDevQuoteRequestId(quoteRequestId)) {
+    return getDevQuoteForRequest(contractor.id, quoteRequestId);
+  }
+
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("quotes")
@@ -83,6 +109,10 @@ export async function getMyQuoteForRequest(ownerId: string, quoteRequestId: stri
 
 export async function listMySubmittedQuotes(ownerId: string) {
   const contractor = await getContractorOrThrow(ownerId);
+  if (isDevQuoteStoreOwner(ownerId)) {
+    return listDevSubmittedQuotes(contractor.id);
+  }
+
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("quotes")
@@ -95,8 +125,29 @@ export async function listMySubmittedQuotes(ownerId: string) {
   return (data ?? []) as unknown as Quote[];
 }
 
+export async function listMyQuotes(ownerId: string) {
+  const contractor = await getContractorOrThrow(ownerId);
+  if (isDevQuoteStoreOwner(ownerId)) {
+    return listDevQuotes(contractor.id);
+  }
+
+  const supabase = createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("quotes")
+    .select(quoteSelect)
+    .eq("contractor_id", contractor.id)
+    .order("updated_at", { ascending: false, nullsFirst: false });
+
+  if (error) throw error;
+  return (data ?? []) as unknown as Quote[];
+}
+
 export async function getMyQuote(ownerId: string, quoteId: string) {
   const contractor = await getContractorOrThrow(ownerId);
+  if (isDevQuoteId(quoteId)) {
+    return getDevQuote(contractor.id, quoteId);
+  }
+
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("quotes")
